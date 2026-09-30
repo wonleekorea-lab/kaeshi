@@ -53,7 +53,7 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .bar{display:flex;justify-content:space-between;align-items:center;padding:12px 0 18px}
 
 /* 答え：メモの行 */
-.lines{margin:18px 0 0;list-style:none}
+.lines{margin:14px 0 24px;list-style:none}
 .lines li{font-family:var(--serif);font-size:16px;line-height:var(--g);padding:5.5px 0;
   display:flex;gap:10px;animation:in .25s ease-out}
 .lines li::before{content:"—";color:var(--mid)}
@@ -61,24 +61,25 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .live{min-height:22px;font-family:var(--serif);font-size:15px;color:var(--mid);margin-top:8px}
 
-/* 声 */
-.micwrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 4px}
-.mic{width:64px;height:64px;border-radius:50%;background:var(--ink);color:var(--paper);
-  display:flex;align-items:center;justify-content:center;position:relative}
-.mic svg{width:24px;height:24px}
-.mic.rec::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid var(--ink);animation:ring 1.3s ease-out infinite}
-@keyframes ring{from{transform:scale(.9);opacity:.9}to{transform:scale(1.3);opacity:0}}
+/* 入力 */
+.qhead{display:flex;justify-content:space-between;align-items:baseline}
+.tiny{font-size:11px;color:var(--mid);letter-spacing:.1em;padding:6px 0}
 .count{font-size:11px;color:var(--mid);letter-spacing:.12em}
-.type{display:flex;gap:8px;align-items:center}
-.type input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--soft);
-  font:inherit;font-family:var(--serif);font-size:15px;color:var(--ink);padding:8px 0;outline:none;border-radius:0}
-.type input::placeholder{color:var(--mid)}
+.type{display:flex;gap:10px;align-items:flex-end;margin-top:18px;border-bottom:1px solid var(--ink)}
+.type textarea{flex:1;background:transparent;border:none;resize:none;overflow:hidden;
+  font-family:var(--serif);font-size:17px;line-height:1.6;color:var(--ink);padding:8px 0;outline:none;border-radius:0}
+.type textarea::placeholder{color:var(--mid);font-size:14px}
+.add{font-size:13px;color:var(--mid);padding:8px 0}
+.acts{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.pill{font-size:14px;letter-spacing:.08em;padding:10px 18px;border:1px solid var(--soft);border-radius:999px;background:var(--paper)}
+.pill.ink{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pill:disabled{opacity:.25}
 
 /* ヒント：付箋のように一枚 */
-.hint{display:none;margin-top:18px;padding:16px 0 4px;border-top:1px solid var(--ink);animation:in .3s ease-out}
+.hint{display:none;margin-top:16px;padding:12px 0 2px 14px;border-left:2px solid var(--ink);animation:in .3s ease-out}
 .hint.on{display:block}
 .hint .k{font-size:10px;letter-spacing:.22em;color:var(--mid)}
-.hint .s{font-family:var(--serif);font-size:21px;line-height:1.6;margin:8px 0 6px}
+.hint .s{font-family:var(--serif);font-size:19px;line-height:1.6;margin:0 0 4px}
 .hint .s .b{display:inline-block;min-width:3.2em;border-bottom:1.5px solid var(--ink);margin:0 2px;transform:translateY(-4px)}
 .hint .n{font-size:12px;color:var(--mid);line-height:1.7}
 
@@ -127,7 +128,7 @@ textarea.io{width:100%;height:110px;background:transparent;color:var(--ink);bord
 <main>
 
 <section class="screen" id="s-recall">
-  <div class="label">きのうの一本　見ずに、声に出す</div>
+  <div class="label">きのうの一本　見ずに、口に出す</div>
   <div class="q" id="rq"></div>
   <div class="reveal hide" id="ra"></div>
   <div class="spacer"></div>
@@ -139,24 +140,16 @@ textarea.io{width:100%;height:110px;background:transparent;color:var(--ink);bord
 </section>
 
 <section class="screen" id="s-ask">
-  <div class="label">きょうの問い</div>
+  <div class="qhead"><span class="label">きょうの問い</span><button class="tiny" id="reroll">別の問い</button></div>
   <div class="q" id="q"></div>
+  <div class="type"><textarea id="typed" rows="1" placeholder="キーボードのマイクで、声で答える" enterkeyhint="send"></textarea><button class="add" id="add">足す</button></div>
+  <div class="acts">
+    <button class="pill" id="hintBtn">ヒント</button>
+    <span class="count" id="count"></span>
+    <button class="pill ink" id="toPick" disabled>一本えらぶ</button>
+  </div>
+  <div class="hint" id="hint"><div class="s" id="hintS"></div><div class="n" id="hintN"></div></div>
   <ul class="lines" id="answers"></ul>
-  <div class="live" id="live"></div>
-  <div class="hint" id="hint"><div class="k" id="hintK"></div><div class="s" id="hintS"></div><div class="n" id="hintN"></div></div>
-  <div class="spacer"></div>
-  <div class="micwrap">
-    <div class="count" id="count"></div>
-    <button class="mic" id="mic" aria-label="声で答える">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-    </button>
-  </div>
-  <div class="type"><input id="typed" placeholder="または、ここに書く" enterkeyhint="done"></div>
-  <div class="bar">
-    <button class="link" id="hintBtn">ヒント</button>
-    <button class="link" id="reroll">別の問い</button>
-    <button class="link ink" id="toPick" disabled>一本えらぶ</button>
-  </div>
 </section>
 
 <section class="screen" id="s-pick">
@@ -214,6 +207,7 @@ try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { st = {}; }
 st.entries = st.entries || [];   // {date, qid, q, answers:[{t,h}], pick, hint}
 st.recall  = st.recall  || {};
 st.draft   = st.draft   || null;
+if (st.hv !== 3) { st.used = []; st.hv = 3; }   // ヒントを書き直したら、出した記録を戻す
 st.used    = st.used    || [];   // 出したヒントのid。一巡するまで同じものは出さない
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
 
@@ -279,22 +273,24 @@ function renderAsk(){
   $("q").textContent = Q(cur.qid).q;
   const box = $("answers"); box.innerHTML = "";
   cur.answers.forEach(a=>{
-    const li=document.createElement("li"); li.append(a.t);
-    if (a.h){ const s=document.createElement("small"); s.textContent=a.h; li.append(s); }
-    box.append(li);
+    const li=document.createElement("li"); li.append(a.t); box.prepend(li);   // 新しい答えを上に
   });
   const n = cur.answers.length;
-  $("count").textContent = n===0 ? "声に出して答える" : n<3 ? `${n}本　まず3本` : n<10 ? `${n}本　10本まで` : `${n}本`;
+  $("count").textContent = n===0 ? "" : n<3 ? `${n}本　まず3本` : n<10 ? `${n}本` : `${n}本　十分`;
   $("toPick").disabled = n<2;
 }
 function addAnswer(t){
   t = t.trim().replace(/[。\s]+$/,""); if(!t) return;
-  cur.answers.push({ t, h: curHint ? curHint.type : "" });
+  cur.answers.push({ t });
   st.draft = cur; save(); renderAsk();
 }
-$("typed").onkeydown = e => {
-  if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); addAnswer($("typed").value); $("typed").value=""; }
-};
+// キーボードのマイクで話す。改行（送信）か「足す」で1本になる
+const ta = $("typed");
+const grow = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; };
+const commit = () => { addAnswer(ta.value); ta.value = ""; grow(); ta.focus(); };
+ta.oninput = () => { if (ta.value.includes("\n")) { ta.value = ta.value.replace(/\n/g,""); commit(); } else grow(); };
+ta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); commit(); } };
+$("add").onclick = commit;
 
 // ---- ヒント ----
 // この問い専用のヒントを先に、なくなったら汎用の型へ。出したものは記録して、全部出るまで繰り返さない。
@@ -327,7 +323,6 @@ function blankify(s){
 }
 $("hintBtn").onclick = () => {
   curHint = nextHint();
-  $("hintK").textContent = curHint.type;
   $("hintS").innerHTML = ""; $("hintS").append(blankify(curHint.s));
   $("hintN").textContent = curHint.n || "";
   $("hint").classList.remove("on"); void $("hint").offsetWidth; $("hint").classList.add("on");
@@ -339,30 +334,9 @@ $("reroll").onclick = () => {
   resetHint(); renderAsk();
 };
 
-// ---- 声 ----
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, recOn = false, finalText = "";
-if (!SR) { $("mic").style.opacity=.25; $("live").textContent = "この端末では声が使えない。下に書くか、キーボードのマイクで"; }
-$("mic").onclick = () => {
-  if (!SR) { $("typed").focus(); return; }
-  if (recOn) { rec.stop(); return; }
-  rec = new SR(); rec.lang = "ja-JP"; rec.interimResults = true; rec.continuous = false;
-  finalText = "";
-  rec.onresult = e => {
-    let interim = "";
-    for (let i=e.resultIndex;i<e.results.length;i++){
-      if (e.results[i].isFinal) finalText += e.results[i][0].transcript; else interim += e.results[i][0].transcript;
-    }
-    $("live").textContent = finalText + interim;
-  };
-  rec.onend = () => { recOn=false; $("mic").classList.remove("rec"); if(finalText) addAnswer(finalText); $("live").textContent=""; };
-  rec.onerror = ev => { $("live").textContent = ev.error==="not-allowed" ? "マイクが許可されていない" : ""; };
-  rec.start(); recOn = true; $("mic").classList.add("rec"); $("live").textContent = "……";
-};
-
 // ---- 丸から一本 ----
 let sel = -1;
-$("toPick").onclick = () => { if (recOn) rec.stop(); renderPick(); show("pick"); };
+$("toPick").onclick = () => { if (ta.value.trim()) commit(); renderPick(); show("pick"); };
 function renderPick(){
   $("pq").textContent = Q(cur.qid).q;
   const c = $("circle"); c.querySelectorAll(".dot").forEach(d=>d.remove());
@@ -386,7 +360,7 @@ $("decide").onclick = () => {
   if (!st.draft || sel < 0) return;
   $("decide").disabled = true;
   const a = cur.answers[sel], q = Q(cur.qid);
-  st.entries.push({ date: cur.date, qid: cur.qid, q: q.q, answers: cur.answers, pick: a.t, hint: a.h });
+  st.entries.push({ date: cur.date, qid: cur.qid, q: q.q, answers: cur.answers, pick: a.t });
   st.draft = null; save(); streak();
   renderMasters(a); show("master");
 };
@@ -403,7 +377,6 @@ function renderMasters(a){
       if (!c.classList.contains("shut")) return;
       c.className = "card open"; c.innerHTML = "";
       const t = document.createElement("div"); t.className="t"; t.textContent = m.type;
-      if (a.h && a.h === m.type){ const s=document.createElement("span"); s.className="same"; s.textContent="あなたと同じ型"; t.append(s); }
       const r = document.createElement("div"); r.className="r"; r.textContent = "「" + m.r + "」";
       const w = document.createElement("div"); w.className="w"; w.textContent = m.w;
       c.append(t, r, w);
@@ -429,7 +402,7 @@ $("toBook").onclick = () => {
   [...st.entries].reverse().forEach(e=>{
     const d = document.createElement("div"); d.className="book-item";
     d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div>`;
-    d.querySelector(".d").textContent = e.date + (e.hint?`　${e.hint}`:"") + (e.recalled?"　身についた":"");
+    d.querySelector(".d").textContent = e.date + (e.recalled?"　身についた":"");
     d.querySelector(".qq").textContent = e.q; d.querySelector(".aa").textContent = e.pick;
     b.append(d);
   });
