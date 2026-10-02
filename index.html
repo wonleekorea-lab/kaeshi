@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fbfaf6">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="返し">
@@ -12,189 +13,229 @@
 <title>返し</title>
 <style>
 :root{
-  --paper:#fbfaf6; --grid:#f1f0eb; --ink:#1a1a1a; --mid:#8a8880; --soft:#d3d0c6;
+  --bg:#f3f2ee; --raise:#e8e6e0; --ink:#161616; --mid:#7d7b76; --line:#d6d3cc;
   --serif:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
   --sans:-apple-system,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
-  --g:22px;                                   /* 方眼のひと目 */
 }
 @media (prefers-color-scheme: dark){
-  :root{ --paper:#121211; --grid:#171716; --ink:#e9e7e1; --mid:#7c7a74; --soft:#34332f; }
+  :root{ --bg:#121212; --raise:#1d1d1d; --ink:#ecebe6; --mid:#85837e; --line:#2b2b2a; }
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{min-height:100%}
-body{
-  background-color:var(--paper);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size:var(--g) var(--g);
-  background-attachment:fixed;
-  color:var(--ink);font-family:var(--sans);
-  padding:calc(env(safe-area-inset-top) + 8px) 22px calc(env(safe-area-inset-bottom) + 8px);
-  display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  padding:calc(env(safe-area-inset-top) + 6px) 20px calc(env(safe-area-inset-bottom) + 6px);
+  min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden}
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
-header{display:flex;justify-content:space-between;align-items:baseline;height:44px;
-  font-size:11px;letter-spacing:.14em;color:var(--mid)}
-main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;height:44px;font-size:12px;letter-spacing:.14em;color:var(--mid)}
+header button{padding:10px 0 10px 16px;color:var(--mid);letter-spacing:.14em}
+main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin:0 auto;padding-bottom:64px}
 .screen{display:none;flex:1;flex-direction:column}
 .screen.on{display:flex}
-.spacer{flex:1}
+.mid-col{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 0 16px}
 
-/* 文字 */
-.label{font-size:11px;letter-spacing:.2em;color:var(--mid);margin:22px 0 8px}
-.q{font-family:var(--serif);font-size:25px;line-height:1.55;letter-spacing:.02em}
-.q.s{font-size:17px}
+.label{font-size:11px;letter-spacing:.22em;color:var(--mid);margin-bottom:10px}
+.q{font-family:var(--serif);font-size:27px;line-height:1.5;letter-spacing:.02em}
+.q.s{font-size:18px}
 .sub{font-size:13px;color:var(--mid);line-height:1.8}
 
-/* ボタンは文字だけ。主役だけ黒丸・黒帯 */
-.link{font-size:14px;letter-spacing:.08em;color:var(--mid);padding:10px 2px}
-.link.ink{color:var(--ink);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
-.link:disabled{opacity:.3;text-decoration:none}
-.bar{display:flex;justify-content:space-between;align-items:center;padding:12px 0 18px}
-
-/* 答え：メモの行 */
-.lines{margin:14px 0 24px;list-style:none}
-.lines li{font-family:var(--serif);font-size:16px;line-height:var(--g);padding:5.5px 0;
-  display:flex;gap:10px;animation:in .25s ease-out}
-.lines li::before{content:"—";color:var(--mid)}
-.lines li small{font-family:var(--sans);font-size:10px;color:var(--mid);letter-spacing:.05em;margin-left:auto;white-space:nowrap;padding-left:8px}
-@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.live{min-height:22px;font-family:var(--serif);font-size:15px;color:var(--mid);margin-top:8px}
+/* ボタン：大きく、押しやすく */
+.btn{height:54px;border-radius:14px;font-size:16px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;
+  background:var(--raise);color:var(--ink);width:100%}
+.btn.ink{background:var(--ink);color:var(--bg)}
+.btn:disabled{opacity:.3}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.textbtn{font-size:12px;color:var(--mid);letter-spacing:.1em;padding:0}
 
 /* 入力 */
-.qhead{display:flex;justify-content:space-between;align-items:baseline}
-.tiny{font-size:11px;color:var(--mid);letter-spacing:.1em;padding:6px 0}
-.count{font-size:11px;color:var(--mid);letter-spacing:.12em}
-.type{display:flex;gap:10px;align-items:flex-end;margin-top:18px;border-bottom:1px solid var(--ink)}
-.type textarea{flex:1;background:transparent;border:none;resize:none;overflow:hidden;
-  font-family:var(--serif);font-size:17px;line-height:1.6;color:var(--ink);padding:8px 0;outline:none;border-radius:0}
-.type textarea::placeholder{color:var(--mid);font-size:14px}
-.add{font-size:13px;color:var(--mid);padding:8px 0}
-.acts{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-.pill{font-size:14px;letter-spacing:.08em;padding:10px 18px;border:1px solid var(--soft);border-radius:999px;background:var(--paper)}
-.pill.ink{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.pill:disabled{opacity:.25}
+.box{background:var(--raise);border-radius:16px;padding:14px 16px 8px;margin-top:22px}
+.box textarea{width:100%;background:transparent;border:none;resize:none;outline:none;overflow:hidden;
+  font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink);min-height:30px}
+.box textarea::placeholder{color:var(--mid);font-size:15px}
+.boxfoot{display:flex;justify-content:space-between;align-items:center;min-height:28px;font-size:11px;color:var(--mid);letter-spacing:.08em}
+.boxfoot button{font-size:13px;color:var(--mid);padding:6px 0 6px 16px}
+.acts{margin-top:12px}
 
-/* ヒント：付箋のように一枚 */
-.hint{display:none;margin-top:16px;padding:12px 0 2px 14px;border-left:2px solid var(--ink);animation:in .3s ease-out}
+/* ヒント：めくる札 */
+.hint{display:none;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:16px 16px 6px;touch-action:pan-y;user-select:none}
 .hint.on{display:block}
-.hint .k{font-size:10px;letter-spacing:.22em;color:var(--mid)}
-.hint .s{font-family:var(--serif);font-size:19px;line-height:1.6;margin:0 0 4px}
-.hint .s .b{display:inline-block;min-width:3.2em;border-bottom:1.5px solid var(--ink);margin:0 2px;transform:translateY(-4px)}
-.hint .n{font-size:12px;color:var(--mid);line-height:1.7}
+.hint .s{font-family:var(--serif);font-size:19px;line-height:1.6}
+.hint .n{font-size:12px;color:var(--mid);margin-top:6px;line-height:1.6}
+.hint .nav{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.hint .nav button{width:56px;height:44px;color:var(--mid);font-size:22px}
+.hint .nav span{font-size:10px;letter-spacing:.2em;color:var(--mid)}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+
+/* 答えの一覧：触ると直せる */
+.lines{list-style:none;margin-top:16px}
+.lines li{font-family:var(--serif);font-size:16px;line-height:1.6;padding:13px 2px;border-top:1px solid var(--line);animation:in .2s ease-out;cursor:pointer}
+.lines li:last-child{border-bottom:1px solid var(--line)}
+.lines li.editing{color:var(--mid)}
 
 /* 丸 */
-.circle{position:relative;width:min(90vw,420px);aspect-ratio:1;margin:12px auto 0}
-.circle .ring{position:absolute;inset:14%;border:1px solid var(--ink);border-radius:50%}
-.circle .center{position:absolute;inset:25%;display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:8px;font-family:var(--serif);font-size:15px;line-height:1.6;color:var(--mid)}
-.circle .center.sel{color:var(--ink);font-size:16px}
-.dot{position:absolute;transform:translate(-50%,-50%);max-width:27%;background:var(--paper);
-  padding:4px 8px;font-family:var(--serif);font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  border:1px solid var(--soft);border-radius:999px;transition:all .2s}
-.dot.sel{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.circle{position:relative;width:min(88vw,400px);aspect-ratio:1;margin:8px auto}
+.circle .ring{position:absolute;inset:15%;border:1px solid var(--line);border-radius:50%}
+.circle .center{position:absolute;inset:26%;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:6px;font-family:var(--serif);font-size:16px;line-height:1.6;color:var(--mid)}
+.circle .center.sel{color:var(--ink)}
+.dot{position:absolute;transform:translate(-50%,-50%);max-width:30%;background:var(--raise);
+  padding:10px 12px;font-family:var(--serif);font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:999px}
+.dot.sel{background:var(--ink);color:var(--bg)}
 
-/* 名人 */
-.mine{font-family:var(--serif);font-size:17px;line-height:1.7}
-.cards{display:flex;flex-direction:column;margin-top:4px}
-.card{text-align:left;width:100%;padding:16px 0;border-top:1px solid var(--soft)}
-.card:last-child{border-bottom:1px solid var(--soft)}
-.card.shut{color:var(--mid);font-size:13px;letter-spacing:.2em}
-.card .t{font-size:10px;letter-spacing:.2em;color:var(--mid);margin-bottom:6px;display:flex;gap:10px}
-.card .r{font-family:var(--serif);font-size:17px;line-height:1.75}
-.card .w{font-size:12px;color:var(--mid);margin-top:8px;line-height:1.7}
-.card.open{animation:in .3s ease-out}
-.same{color:var(--ink);letter-spacing:.05em}
+/* 磨く */
+.mine{font-family:var(--serif);font-size:21px;line-height:1.65}
+.cards{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.card{text-align:left;width:100%;padding:16px;border-radius:16px;background:var(--raise);animation:in .25s ease-out}
+.card .r{font-family:var(--serif);font-size:17px;line-height:1.7}
+.card .w{font-size:12px;color:var(--mid);margin-top:8px;line-height:1.6}
+.card.chosen{outline:1.5px solid var(--ink)}
+.wait{font-size:13px;color:var(--mid);letter-spacing:.1em;text-align:center;padding:30px 0;line-height:1.8}
 
 /* 思い出す */
-.reveal{margin-top:20px;min-height:80px;font-family:var(--serif);font-size:19px;line-height:1.65}
-.reveal.hide{color:transparent;text-shadow:0 0 12px var(--mid);user-select:none}
+.reveal{margin-top:22px;min-height:80px;font-family:var(--serif);font-size:20px;line-height:1.65}
+.reveal.hide{color:transparent;text-shadow:0 0 14px var(--mid);user-select:none}
 
 /* おわり・ネタ帳 */
-.big{font-family:var(--serif);font-size:64px;text-align:center;margin-top:56px;line-height:1}
-.center-t{text-align:center;margin-top:14px}
-.book-item{padding:12px 0;border-top:1px solid var(--soft)}
+.big{font-family:var(--serif);font-size:72px;text-align:center;line-height:1}
+.center-t{text-align:center;margin-top:16px}
+.book-item{padding:14px 0;border-top:1px solid var(--line)}
 .book-item .d{font-size:10px;color:var(--mid);letter-spacing:.12em}
 .book-item .qq{font-size:12px;color:var(--mid);margin:4px 0}
-.book-item .aa{font-family:var(--serif);font-size:16px;line-height:1.65}
-textarea.io{width:100%;height:110px;background:transparent;color:var(--ink);border:1px solid var(--soft);padding:8px;font-size:11px;margin-top:6px}
+.book-item .aa{font-family:var(--serif);font-size:17px;line-height:1.65;outline:none;border-radius:8px}
+.book-item .aa[contenteditable=true]{background:var(--raise);padding:8px 10px}
+.book-item .tools{display:flex;gap:22px;margin-top:2px}
+.book-item .tools button{font-size:13px;color:var(--mid);padding:10px 0}
+.set{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.set input,.set textarea{width:100%;background:var(--raise);color:var(--ink);border:none;border-radius:10px;padding:12px;font-size:13px;margin-top:8px;outline:none}
+
+/* 寄席：下から引き上げる */
+.handle{position:fixed;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom));display:flex;flex-direction:column;
+  align-items:center;padding-top:12px;gap:7px;background:linear-gradient(transparent,var(--bg) 45%);touch-action:none;z-index:5;cursor:pointer}
+.handle i{width:38px;height:4px;border-radius:2px;background:var(--mid);opacity:.5}
+.handle span{font-size:11px;letter-spacing:.26em;color:var(--mid)}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  padding:calc(env(safe-area-inset-top) + 6px) 20px calc(env(safe-area-inset-bottom) + 14px);display:flex;flex-direction:column}
+.sheet.on{transform:none}
+.sheet .top{display:flex;justify-content:space-between;align-items:center;height:44px;font-size:12px;letter-spacing:.14em;color:var(--mid);max-width:460px;width:100%;margin:0 auto}
+.sheet .top button{padding:10px 0 10px 16px;color:var(--mid)}
+.ycard{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:460px;width:100%;margin:0 auto;touch-action:pan-y;user-select:none;cursor:pointer}
+.ycard .setup{font-family:var(--serif);font-size:20px;line-height:1.75}
+.ycard .ask{font-size:12px;color:var(--mid);letter-spacing:.16em;margin-top:24px}
+.ycard .turn{font-family:var(--serif);font-size:20px;line-height:1.75;margin-top:22px;padding-top:20px;border-top:1px solid var(--line);animation:in .25s ease-out}
+.ycard .why{font-size:13px;margin-top:14px;line-height:1.7}
+.ycard .meta{font-size:11px;color:var(--mid);margin-top:10px;line-height:1.7}
+.ycard .meta a{color:var(--mid)}
+.ycard.anim-l{animation:slideL .22s ease-out}
+.ycard.anim-r{animation:slideR .22s ease-out}
+.ynav{display:flex;gap:10px;max-width:460px;width:100%;margin:0 auto}
+.ynav .btn:first-child,.ynav .btn:last-child{flex:0 0 72px}
 </style>
 </head>
 <body>
 <header>
   <span id="streak">返し</span>
-  <button id="toBook" class="count">ネタ帳</button>
+  <button id="toBook">ネタ帳</button>
 </header>
 <main>
 
 <section class="screen" id="s-recall">
-  <div class="label">きのうの一本　見ずに、口に出す</div>
-  <div class="q" id="rq"></div>
-  <div class="reveal hide" id="ra"></div>
-  <div class="spacer"></div>
-  <div class="bar" id="rfoot1"><span></span><button class="link ink" id="rShow">言った。答えを見る</button></div>
-  <div class="bar" id="rfoot2" style="display:none">
-    <button class="link" id="rNo">出なかった</button>
-    <button class="link ink" id="rYes">言えた</button>
+  <div class="mid-col">
+    <div class="label">きのうの一本　見ずに、口に出す</div>
+    <div class="q" id="rq"></div>
+    <div class="reveal hide" id="ra"></div>
+  </div>
+  <div id="rfoot1"><button class="btn ink" id="rShow">言った。答えを見る</button></div>
+  <div class="row" id="rfoot2" style="display:none">
+    <button class="btn" id="rNo">出なかった</button>
+    <button class="btn ink" id="rYes">言えた</button>
   </div>
 </section>
 
 <section class="screen" id="s-ask">
-  <div class="qhead"><span class="label">きょうの問い</span><button class="tiny" id="reroll">別の問い</button></div>
-  <div class="q" id="q"></div>
-  <div class="type"><textarea id="typed" rows="1" placeholder="キーボードのマイクで、声で答える" enterkeyhint="send"></textarea><button class="add" id="add">足す</button></div>
-  <div class="acts">
-    <button class="pill" id="hintBtn">ヒント</button>
-    <span class="count" id="count"></span>
-    <button class="pill ink" id="toPick" disabled>一本えらぶ</button>
+  <div class="mid-col">
+    <div class="label" style="display:flex;justify-content:space-between"><span>きょうの問い</span><button class="textbtn" id="reroll">別の問い</button></div>
+    <div class="q" id="q"></div>
+    <div class="box">
+      <textarea id="typed" rows="1" placeholder="キーボードのマイクで答える" enterkeyhint="done"></textarea>
+      <div class="boxfoot"><span id="count"></span><span><button id="cancelBtn" style="display:none">やめる</button><button id="delBtn" style="display:none">消す</button></span></div>
+    </div>
+    <div class="row acts">
+      <button class="btn" id="hintBtn">ヒント</button>
+      <button class="btn ink" id="add">足す</button>
+    </div>
+    <div class="hint" id="hint">
+      <div class="s" id="hintS"></div><div class="n" id="hintN"></div>
+      <div class="nav"><button id="hPrev" aria-label="前のヒント">‹</button><span>触れる・払うと次へ</span><button id="hNext" aria-label="次のヒント">›</button></div>
+    </div>
+    <ul class="lines" id="answers"></ul>
+    <div style="margin-top:16px"><button class="btn" id="toPick" disabled>一本えらぶ</button></div>
   </div>
-  <div class="hint" id="hint"><div class="s" id="hintS"></div><div class="n" id="hintN"></div></div>
-  <ul class="lines" id="answers"></ul>
 </section>
 
 <section class="screen" id="s-pick">
-  <div class="label">一本えらぶ</div>
-  <div class="q s" id="pq"></div>
-  <div class="circle" id="circle"><div class="ring"></div><div class="center" id="center">触れて、えらぶ</div></div>
-  <div class="spacer"></div>
-  <div class="bar">
-    <button class="link" id="back">もっと言う</button>
-    <button class="link ink" id="decide" disabled>これにする</button>
+  <div class="mid-col">
+    <div class="label">一本えらぶ</div>
+    <div class="q s" id="pq"></div>
+    <div class="circle" id="circle"><div class="ring"></div><div class="center" id="center">触れて、えらぶ</div></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="back">もっと言う</button>
+    <button class="btn ink" id="decide" disabled>これにする</button>
   </div>
 </section>
 
-<section class="screen" id="s-master">
-  <div class="label">あなたの一本</div>
-  <div class="mine" id="mine"></div>
-  <div class="label" style="margin-top:28px">名人なら　めくる</div>
-  <div class="cards" id="cards"></div>
-  <div class="spacer"></div>
-  <div class="bar"><span></span><button class="link ink" id="finish" disabled>きょうはおわり</button></div>
+<section class="screen" id="s-polish">
+  <div class="mid-col">
+    <div class="label" id="pqLabel">あなたの一本</div>
+    <div class="mine" id="mine"></div>
+    <div class="cards" id="pcards"></div>
+  </div>
+  <div class="row">
+    <button class="btn" id="finish">このままでいい</button>
+    <button class="btn ink" id="polishBtn">磨いてもらう</button>
+  </div>
 </section>
 
 <section class="screen" id="s-done">
-  <div class="big" id="dnum"></div>
-  <div class="sub center-t" id="dtext"></div>
-  <div class="spacer"></div>
-  <div class="bar"><span></span><button class="link" id="again">もう一問</button></div>
+  <div class="mid-col">
+    <div class="big" id="dnum"></div>
+    <div class="sub center-t" id="dtext"></div>
+  </div>
+  <button class="btn" id="again">もう一問</button>
 </section>
 
 <section class="screen" id="s-book">
-  <div class="label" id="bookHead">ネタ帳</div>
+  <div class="label" id="bookHead" style="margin-top:14px">ネタ帳</div>
   <div id="book"></div>
-  <div class="bar">
-    <button class="link" id="ioToggle">引っ越し</button>
-    <button class="link ink" id="bookBack">もどる</button>
+  <div class="set">
+    <div class="label">磨く機能の鍵</div>
+    <div class="sub">Anthropic の API キーを入れると、一本を磨いて返してくれる。鍵はこの端末の中にだけ保存される。</div>
+    <input id="keyIn" type="password" placeholder="sk-ant-..." autocomplete="off">
+    <div class="label" style="margin-top:20px">引っ越し</div>
+    <textarea id="ioText" rows="3"></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn" id="ioOut">書き出す</button><button class="btn" id="ioIn">読み込む</button></div>
   </div>
-  <div id="io" style="display:none;padding-bottom:20px">
-    <textarea class="io" id="ioText"></textarea>
-    <div class="bar"><button class="link" id="ioOut">書き出す</button><button class="link" id="ioIn">読み込む</button></div>
-  </div>
+  <div style="margin-top:20px"><button class="btn ink" id="bookBack">もどる</button></div>
 </section>
 
 </main>
+
+<div class="handle" id="handle"><i></i><span>寄席　引き上げる</span></div>
+<div class="sheet" id="sheet">
+  <div class="top"><span id="ycount">寄席</span><button id="yClose">とじる</button></div>
+  <div class="ycard" id="ycard"></div>
+  <div class="ynav">
+    <button class="btn" id="yPrev">‹</button>
+    <button class="btn ink" id="yFlip">返しを見る</button>
+    <button class="btn" id="yNext">›</button>
+  </div>
+</div>
+
 <script src="data.js"></script>
 <script src="hints.js"></script>
+<script src="yose.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const KEY = "kaeshi-v1";
@@ -204,12 +245,14 @@ const today = () => ymd(new Date());
 // ---- 保存 ----
 let st;
 try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { st = {}; }
-st.entries = st.entries || [];   // {date, qid, q, answers:[{t,h}], pick, hint}
+st.entries = st.entries || [];   // {date, qid, q, answers:[{t}], pick, original, polished:[{text,note}]}
 st.recall  = st.recall  || {};
 st.draft   = st.draft   || null;
-if (st.hv !== 3) { st.used = []; st.hv = 3; }   // ヒントを書き直したら、出した記録を戻す
-st.used    = st.used    || [];   // 出したヒントのid。一巡するまで同じものは出さない
+if (st.hv !== 3) { st.used = []; st.hv = 3; }
+st.used    = st.used    || [];
+st.yose    = st.yose    || 0;    // 寄席の、いま見ている札
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
+const getKey = () => { try { return localStorage.getItem("kaeshi-key") || ""; } catch(e) { return ""; } };
 
 function hash(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
 function pickQid(salt=0){
@@ -233,6 +276,20 @@ function streak(){
   return n;
 }
 
+// 左右に払う・触れるを受ける（ヒントの札と寄席の札で使う）
+function swipe(el, onLeft, onRight, onTap){
+  let x0=null, y0=0, t0=0, touched=false;
+  el.addEventListener("touchstart", e=>{ touched=true; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
+  el.addEventListener("touchend", e=>{
+    if (x0===null) return;
+    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
+    if (e.target.closest("button,a")) return;
+    if (Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)) { (dx<0?onLeft:onRight)(); e.preventDefault(); }
+    else if (Math.abs(dx)<10 && Math.abs(dy)<10 && Date.now()-t0<450 && onTap) { onTap(); e.preventDefault(); }
+  });
+  el.addEventListener("click", e=>{ if (!touched && onTap && !e.target.closest("button,a")) onTap(); });
+}
+
 // ---- 起動 ----
 let cur, salt = 0;
 function start(){
@@ -244,7 +301,7 @@ function start(){
 function beginAsk(){
   if (st.draft && st.draft.date === today()) cur = st.draft;
   else { cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save(); }
-  resetHint(); renderAsk(); show("ask");
+  resetHint(); endEdit(); renderAsk(); show("ask");
 }
 
 // ---- 思い出す ----
@@ -255,10 +312,9 @@ function showRecall(i){
   $("rfoot1").style.display=""; $("rfoot2").style.display="none";
   show("recall");
 }
-$("rShow").onclick = () => { $("ra").classList.remove("hide"); $("rfoot1").style.display="none"; $("rfoot2").style.display=""; };
+$("rShow").onclick = () => { $("ra").classList.remove("hide"); $("rfoot1").style.display="none"; $("rfoot2").style.display="flex"; };
 function recallDone(ok){
   const e = st.entries[rIdx];
-  e.tries = (e.tries||0)+1;
   if (ok) e.hits = (e.hits||0)+1;
   // 言えたら3日後にもう一度、2回言えたら卒業。出なければ翌日また
   if (ok && e.hits >= 2) e.recalled = true;
@@ -268,36 +324,50 @@ function recallDone(ok){
 $("rYes").onclick = () => recallDone(true);
 $("rNo").onclick  = () => recallDone(false);
 
-// ---- 答える ----
+// ---- 答える／直す ----
+const ta = $("typed");
+let editIdx = null;
 function renderAsk(){
   $("q").textContent = Q(cur.qid).q;
   const box = $("answers"); box.innerHTML = "";
-  cur.answers.forEach(a=>{
-    const li=document.createElement("li"); li.append(a.t); box.prepend(li);   // 新しい答えを上に
+  cur.answers.forEach((a,i)=>{
+    const li=document.createElement("li"); li.textContent = a.t;
+    if (i===editIdx) li.classList.add("editing");
+    li.onclick = () => startEdit(i);
+    box.prepend(li);                       // 新しい答えを上に
   });
   const n = cur.answers.length;
-  $("count").textContent = n===0 ? "" : n<3 ? `${n}本　まず3本` : n<10 ? `${n}本` : `${n}本　十分`;
+  $("count").textContent = editIdx!==null ? "直している" : n===0 ? "" : n<3 ? `${n}本　まず3本　触れると直せる` : `${n}本　触れると直せる`;
   $("toPick").disabled = n<2;
+  $("toPick").classList.toggle("ink", n>=3);
 }
-function addAnswer(t){
-  t = t.trim().replace(/[。\s]+$/,""); if(!t) return;
-  cur.answers.push({ t });
-  st.draft = cur; save(); renderAsk();
-}
-// キーボードのマイクで話す。改行（送信）か「足す」で1本になる
-const ta = $("typed");
 const grow = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; };
-const commit = () => { addAnswer(ta.value); ta.value = ""; grow(); ta.focus(); };
+function commit(){
+  const t = ta.value.trim().replace(/[。\s]+$/,"");
+  if (t) {
+    if (editIdx!==null) cur.answers[editIdx].t = t; else cur.answers.push({ t });
+    st.draft = cur; save();
+  }
+  ta.value = ""; grow(); endEdit(); renderAsk();
+}
+function startEdit(i){
+  editIdx = i; ta.value = cur.answers[i].t; grow(); ta.focus();
+  $("add").textContent = "直す"; $("delBtn").style.display=""; $("cancelBtn").style.display="";
+  renderAsk();
+}
+function endEdit(){
+  editIdx = null; $("add").textContent = "足す"; $("delBtn").style.display="none"; $("cancelBtn").style.display="none";
+}
+$("delBtn").onclick = () => { cur.answers.splice(editIdx,1); st.draft=cur; save(); ta.value=""; grow(); endEdit(); renderAsk(); };
+$("cancelBtn").onclick = () => { ta.value=""; grow(); endEdit(); renderAsk(); };
+$("add").onclick = commit;
 ta.oninput = () => { if (ta.value.includes("\n")) { ta.value = ta.value.replace(/\n/g,""); commit(); } else grow(); };
 ta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); commit(); } };
-$("add").onclick = commit;
 
-// ---- ヒント ----
-// この問い専用のヒントを先に、なくなったら汎用の型へ。出したものは記録して、全部出るまで繰り返さない。
-// 同じ型が続かないようにする。
-let curHint = null, lastType = "";
-function resetHint(){ curHint=null; lastType=""; $("hint").classList.remove("on"); $("hintBtn").textContent="ヒント"; }
-function nextHint(){
+// ---- ヒント：触れる・左右に払う・‹ › でテンポよくめくる ----
+let hHist = [], hPos = -1, lastType = "";
+function resetHint(){ hHist=[]; hPos=-1; lastType=""; $("hint").classList.remove("on"); $("hintBtn").textContent="ヒント"; }
+function freshHint(){
   const own = (QHINTS[cur.qid]||[]).map((h,i)=>({...h, id:`${cur.qid}:${i}`}));
   const gen = SPARKS.map((h,i)=>({...h, id:`g:${i}`}));
   const used = new Set(st.used);
@@ -305,33 +375,34 @@ function nextHint(){
   let pool = order(own.filter(h=>!used.has(h.id)));
   if (!pool.length) {
     let g = gen.filter(h=>!used.has(h.id));
-    if (!g.length) { st.used = st.used.filter(id=>!id.startsWith("g:")); g = gen; }   // 汎用が一巡したら戻す
+    if (!g.length) { st.used = st.used.filter(id=>!id.startsWith("g:")); g = gen; }
     pool = order(g);
   }
   const h = pool.find(x=>x.type!==lastType) || pool[0];
-  st.used.push(h.id); save();
-  lastType = h.type;
+  st.used.push(h.id); save(); lastType = h.type;
   return h;
 }
-function blankify(s){
-  const span = document.createElement("span");
-  s.split("＿＿").forEach((part,i)=>{
-    if (i) { const b=document.createElement("span"); b.className="b"; span.append(b); }
-    span.append(part);
-  });
-  return span;
+function drawHint(anim){
+  const h = hHist[hPos], c = $("hint");
+  $("hintS").textContent = h.s; $("hintN").textContent = h.n || "";
+  c.classList.add("on");
+  c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim} .2s ease-out`;
+  $("hPrev").style.visibility = hPos>0 ? "visible" : "hidden";
 }
-$("hintBtn").onclick = () => {
-  curHint = nextHint();
-  $("hintS").innerHTML = ""; $("hintS").append(blankify(curHint.s));
-  $("hintN").textContent = curHint.n || "";
-  $("hint").classList.remove("on"); void $("hint").offsetWidth; $("hint").classList.add("on");
-  $("hintBtn").textContent = "別のヒント";
-};
+function hintNext(){
+  if (hPos < hHist.length-1) hPos++; else { hHist.push(freshHint()); hPos = hHist.length-1; }
+  drawHint("slideL"); $("hintBtn").textContent = "次のヒント";
+}
+function hintPrev(){ if (hPos>0){ hPos--; drawHint("slideR"); } }
+$("hintBtn").onclick = hintNext;
+$("hNext").onclick = hintNext;
+$("hPrev").onclick = hintPrev;
+swipe($("hint"), hintNext, hintPrev, hintNext);
+
 $("reroll").onclick = () => {
   if (cur.answers.length && !confirm("いまの答えは消えます。別の問いにしますか？")) return;
   salt++; cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save();
-  resetHint(); renderAsk();
+  resetHint(); endEdit(); renderAsk();
 };
 
 // ---- 丸から一本 ----
@@ -344,7 +415,7 @@ function renderPick(){
   const n = cur.answers.length;
   cur.answers.forEach((a,i)=>{
     const ang = -Math.PI/2 + i*2*Math.PI/n;
-    const r = n>8 && i%2 ? 28 : 36;
+    const r = n>8 && i%2 ? 27 : 35;
     const d = document.createElement("button"); d.className="dot";
     d.style.left = (50 + r*Math.cos(ang))+"%"; d.style.top = (50 + r*Math.sin(ang))+"%";
     d.textContent = a.t;
@@ -356,37 +427,97 @@ function renderPick(){
   });
 }
 $("back").onclick = () => show("ask");
+let entry = null, fromBook = false;
 $("decide").onclick = () => {
   if (!st.draft || sel < 0) return;
   $("decide").disabled = true;
   const a = cur.answers[sel], q = Q(cur.qid);
-  st.entries.push({ date: cur.date, qid: cur.qid, q: q.q, answers: cur.answers, pick: a.t });
-  st.draft = null; save(); streak();
-  renderMasters(a); show("master");
+  entry = { date: cur.date, qid: cur.qid, q: q.q, answers: cur.answers, pick: a.t };
+  st.entries.push(entry); st.draft = null; save(); streak();
+  fromBook = false; openPolish(entry);
 };
 
-// ---- 名人の返し ----
-function renderMasters(a){
-  $("mine").textContent = a.t;
-  const box = $("cards"); box.innerHTML = "";
-  const ms = Q(cur.qid).m; let opened = 0;
-  ms.forEach((m,i)=>{
-    const c = document.createElement("button"); c.className = "card shut";
-    c.textContent = ["一","二","三"][i] + "　　めくる";
+// ---- 磨く：自分の一本を、Claude に磨いて返してもらう ----
+function openPolish(e){
+  entry = e;
+  $("pqLabel").textContent = e.q;
+  $("mine").textContent = e.pick; $("pcards").innerHTML = "";
+  $("polishBtn").disabled = false; $("polishBtn").textContent = e.polished ? "もう一度磨く" : "磨いてもらう";
+  $("finish").textContent = fromBook ? "もどる" : "このままでいい";
+  if (e.polished) drawPolished(e.polished);
+  show("polish");
+}
+const SYSTEM = `あなたは会話の「返し」を磨く相棒。ユーザーは日常の質問への返し方を毎日練習している。
+ユーザーの一本を、本人の声と発想の芯を残したまま、口に出して言える一言に磨く。
+
+磨き方：
+- 相手の予想から一段ずらし、そのあと「言われてみれば確かに」と腑に落ちる形にする。ずれっぱなしにしない。
+- 最後は本当の答えに着地させる。
+- 話し言葉で、長くても二文。言い切って止める。言い訳・説明・前のめりな一言を最後に足さない。
+- 笑いの的は自分にする。相手を下げない。皮肉・下ネタ・自慢にしない。
+- 3本は方向を変える。たとえば「削って短く」「具体を一つ足す」「ひとひねりする」。
+- note には、どこを変えたかを一言で書く（20字以内）。
+- 同じ問いへのユーザーの他の答えも素材として使ってよい。`;
+const SCHEMA = { type:"object", additionalProperties:false, required:["versions"],
+  properties:{ versions:{ type:"array", items:{ type:"object", additionalProperties:false, required:["text","note"],
+    properties:{ text:{type:"string"}, note:{type:"string"} } } } } };
+function waitMsg(t){ const box=$("pcards"); box.innerHTML=""; const w=document.createElement("div"); w.className="wait"; w.textContent=t; box.append(w); }
+async function polish(){
+  const key = getKey();
+  if (!key) return waitMsg("ネタ帳のいちばん下で、磨く機能の鍵を入れてください");
+  $("polishBtn").disabled = true; $("polishBtn").textContent = "磨いています…";
+  waitMsg("磨いています…　十数秒かかります");
+  try {
+    const { default: Anthropic } = await import("https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk/+esm");
+    const client = new Anthropic({ apiKey: key, dangerouslyAllowBrowser: true });
+    const pick = entry.original || entry.pick;
+    const others = entry.answers.map(a=>a.t).filter(t=>t!==pick);
+    const past = st.entries.filter(x=>x!==entry).slice(-8).map(x=>`・${x.q} → ${x.pick}`).join("\n");
+    const res = await client.beta.messages.create({
+      model: "claude-opus-5-5",
+      max_tokens: 4000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
+      system: SYSTEM,
+      messages: [{ role: "user", content:
+        `問い：${entry.q}\n磨く一本：${pick}\n同じ問いへの他の答え：${others.join(" / ") || "なし"}\n` +
+        (past ? `最近の自分の一本（声の参考）：\n${past}\n` : "") + `3本に磨いて。` }],
+    });
+    if (res.stop_reason === "refusal") throw new Error("この一本は磨けなかった");
+    const text = (res.content.find(b=>b.type==="text")||{}).text || "";
+    const out = JSON.parse(text).versions.slice(0,3);
+    entry.polished = out; save(); drawPolished(out);
+  } catch(err) {
+    const s = err && err.status;
+    waitMsg(s===401 ? "鍵が正しくないようです。ネタ帳の下で入れ直してください"
+          : s===429 ? "混み合っています。少し置いてから、もう一度"
+          : !navigator.onLine ? "圏外です。つながってから、もう一度"
+          : "磨けなかった：" + (err && err.message ? err.message.slice(0,90) : "通信の問題"));
+  }
+  $("polishBtn").disabled = false; $("polishBtn").textContent = "もう一度磨く";
+}
+function drawPolished(list){
+  const box = $("pcards"); box.innerHTML = "";
+  list.forEach(v=>{
+    const c = document.createElement("button"); c.className = "card";
+    if (v.text === entry.pick) c.classList.add("chosen");
+    const r = document.createElement("div"); r.className="r"; r.textContent = v.text;
+    const w = document.createElement("div"); w.className="w"; w.textContent = v.note + "　｜　触れると、これに差し替える";
+    c.append(r,w);
     c.onclick = () => {
-      if (!c.classList.contains("shut")) return;
-      c.className = "card open"; c.innerHTML = "";
-      const t = document.createElement("div"); t.className="t"; t.textContent = m.type;
-      const r = document.createElement("div"); r.className="r"; r.textContent = "「" + m.r + "」";
-      const w = document.createElement("div"); w.className="w"; w.textContent = m.w;
-      c.append(t, r, w);
-      if (++opened === ms.length) $("finish").disabled = false;
+      if (!entry.original) entry.original = entry.pick;
+      entry.pick = v.text; save();
+      $("mine").textContent = v.text;
+      box.querySelectorAll(".card").forEach(x=>x.classList.remove("chosen")); c.classList.add("chosen");
+      if (!fromBook) $("finish").textContent = "これでいく";
     };
     box.append(c);
   });
-  $("finish").disabled = true;
 }
+$("polishBtn").onclick = polish;
 $("finish").onclick = () => {
+  if (fromBook) { fromBook = false; return openBook(); }
   const n = streak();
   $("dnum").textContent = st.entries.length;
   $("dtext").innerHTML = `本目が、ネタ帳に。<br>${n>1?`${n}日つづいている。<br>`:""}あした、見ずに言えるか。`;
@@ -394,22 +525,40 @@ $("finish").onclick = () => {
 };
 $("again").onclick = () => { salt++; beginAsk(); };
 
-// ---- ネタ帳 ----
-$("toBook").onclick = () => {
+// ---- ネタ帳：直す・磨く・消す ----
+function openBook(){
   const b = $("book"); b.innerHTML = "";
   $("bookHead").textContent = `ネタ帳　${st.entries.length}本`;
   if (!st.entries.length) b.innerHTML = `<p class="sub">まだ空。一本えらぶと、ここに入る。</p>`;
   [...st.entries].reverse().forEach(e=>{
     const d = document.createElement("div"); d.className="book-item";
-    d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div>`;
+    d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div><div class="tools"><button data-a="edit">直す</button><button data-a="polish">磨く</button><button data-a="del">消す</button></div>`;
     d.querySelector(".d").textContent = e.date + (e.recalled?"　身についた":"");
-    d.querySelector(".qq").textContent = e.q; d.querySelector(".aa").textContent = e.pick;
+    d.querySelector(".qq").textContent = e.q;
+    const aa = d.querySelector(".aa"); aa.textContent = e.pick;
+    const editBtn = d.querySelector('[data-a=edit]');
+    editBtn.onclick = () => {
+      if (aa.isContentEditable) {
+        const t = aa.textContent.trim(); if (t) { e.pick = t; save(); }
+        aa.contentEditable = "false"; editBtn.textContent = "直す";
+      } else {
+        aa.contentEditable = "true"; aa.focus(); editBtn.textContent = "保存";
+        const r=document.createRange(); r.selectNodeContents(aa); r.collapse(false); const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+      }
+    };
+    d.querySelector('[data-a=polish]').onclick = () => { fromBook = true; openPolish(e); };
+    d.querySelector('[data-a=del]').onclick = () => {
+      if (!confirm("この一本を消しますか？")) return;
+      st.entries.splice(st.entries.indexOf(e),1); save(); streak(); openBook();
+    };
     b.append(d);
   });
+  $("keyIn").value = getKey();
   show("book");
-};
+}
+$("toBook").onclick = openBook;
+$("keyIn").onchange = () => { try { localStorage.setItem("kaeshi-key", $("keyIn").value.trim()); } catch(e){} };
 $("bookBack").onclick = () => start();
-$("ioToggle").onclick = () => { const s=$("io").style; s.display = s.display==="none" ? "" : "none"; };
 $("ioOut").onclick = () => { $("ioText").value = JSON.stringify(st); $("ioText").select(); };
 $("ioIn").onclick = () => {
   try { const v = JSON.parse($("ioText").value); if(!v.entries) throw 0;
@@ -417,6 +566,52 @@ $("ioIn").onclick = () => {
     st = v; st.used = st.used || []; save(); start();
   } catch(e){ alert("読み込めない形式です"); }
 };
+
+// ---- 寄席：下から引き上げて、めくって楽しむ ----
+// 国も時代も混ざるように、決まった順で混ぜる
+const DECK = ((typeof YOSE !== "undefined" && YOSE) || []).slice().sort((a,b)=>hash(a.setup)-hash(b.setup));
+let yShown = false;
+function openSheet(){ $("sheet").classList.add("on"); drawY(); }
+function closeSheet(){ $("sheet").classList.remove("on"); }
+function drawY(dir){
+  const c = $("ycard"); c.innerHTML = "";
+  if (!DECK.length){ c.innerHTML = `<p class="sub">まだ札がありません。</p>`; return; }
+  st.yose = ((st.yose % DECK.length) + DECK.length) % DECK.length; save();
+  const y = DECK[st.yose]; yShown = false;
+  $("ycount").textContent = `寄席　${st.yose+1} / ${DECK.length}`;
+  const s=document.createElement("div"); s.className="setup"; s.textContent=y.setup;
+  const a=document.createElement("div"); a.className="ask"; a.textContent="あなたなら、どう返す？　触れると答え";
+  c.append(s,a);
+  $("yFlip").textContent = "返しを見る";
+  c.classList.remove("anim-l","anim-r"); void c.offsetWidth; if (dir) c.classList.add(dir);
+}
+function flipY(){
+  if (!DECK.length) return;
+  if (yShown) return nextY();
+  const y = DECK[st.yose], c=$("ycard"); yShown = true;
+  const t=document.createElement("div"); t.className="turn"; t.textContent=y.turn;
+  const w=document.createElement("div"); w.className="why"; w.textContent=y.why;
+  const m=document.createElement("div"); m.className="meta";
+  m.append(`${y.who}　｜　${y.signal}`);
+  if (y.source){ m.append("　｜　"); const l=document.createElement("a"); l.href=y.source; l.target="_blank"; l.rel="noopener"; l.textContent="出典"; m.append(l); }
+  const ask=c.querySelector(".ask"); if (ask) ask.remove();
+  c.append(t,w,m);
+  $("yFlip").textContent = "次の札";
+}
+function nextY(){ st.yose++; drawY("anim-l"); }
+function prevY(){ st.yose--; drawY("anim-r"); }
+$("yFlip").onclick = flipY; $("yNext").onclick = nextY; $("yPrev").onclick = prevY; $("yClose").onclick = closeSheet;
+swipe($("ycard"), nextY, prevY, flipY);
+(() => {
+  // 取っ手を上に引くか触れると開く。シートの上端を下に払うと閉じる
+  const h = $("handle"); let y0=null, touched=false;
+  h.addEventListener("touchstart", e=>{ touched=true; y0=e.touches[0].clientY; }, {passive:true});
+  h.addEventListener("touchend", e=>{ if (y0===null) return; const dy=e.changedTouches[0].clientY-y0; y0=null; if (dy<-20 || Math.abs(dy)<10) openSheet(); });
+  h.addEventListener("click", ()=>{ if (!touched) openSheet(); });
+  let s0=null; const top=$("sheet").querySelector(".top");
+  top.addEventListener("touchstart", e=>{ s0=e.touches[0].clientY; }, {passive:true});
+  top.addEventListener("touchend", e=>{ if (s0!==null && e.changedTouches[0].clientY-s0>40) closeSheet(); s0=null; });
+})();
 
 start();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
