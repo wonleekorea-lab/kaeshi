@@ -91,6 +91,10 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .card .r{font-family:var(--serif);font-size:17px;line-height:1.7}
 .card .w{font-size:12px;color:var(--mid);margin-top:8px;line-height:1.6}
 .card.chosen{outline:1.5px solid var(--ink)}
+.flags{font-size:12px;color:var(--mid);line-height:1.8;margin-top:10px}
+.flags b{color:var(--ink);font-weight:500}
+.lines li.chosen{color:var(--ink);font-weight:600}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:20;animation:in .2s ease-out}
 .wait{font-size:13px;color:var(--mid);letter-spacing:.1em;text-align:center;padding:30px 0;line-height:1.8}
 
 /* 思い出す */
@@ -190,11 +194,20 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
   <div class="mid-col">
     <div class="label" id="pqLabel">あなたの一本</div>
     <div class="mine" id="mine"></div>
-    <div class="cards" id="pcards"></div>
+    <div class="flags" id="flags"></div>
+    <div class="hint on" id="pcard">
+      <div class="s" id="pS"></div><div class="n" id="pN"></div>
+      <div class="nav"><button id="pPrev" aria-label="前">‹</button><span>磨く問い　触れる・払うと次へ</span><button id="pNext" aria-label="次">›</button></div>
+    </div>
+    <div class="box" style="margin-top:12px">
+      <textarea id="ptyped" rows="1" placeholder="言い直して、足す" enterkeyhint="done"></textarea>
+      <div class="boxfoot"><span>触れると、その一本に差し替え</span><button id="padd">足す</button></div>
+    </div>
+    <ul class="lines" id="pversions"></ul>
   </div>
   <div class="row">
-    <button class="btn" id="finish">このままでいい</button>
-    <button class="btn ink" id="polishBtn">磨いてもらう</button>
+    <button class="btn" id="askClaude">Claudeに頼む</button>
+    <button class="btn ink" id="finish">これでいく</button>
   </div>
 </section>
 
@@ -210,10 +223,7 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
   <div class="label" id="bookHead" style="margin-top:14px">ネタ帳</div>
   <div id="book"></div>
   <div class="set">
-    <div class="label">磨く機能の鍵</div>
-    <div class="sub">Anthropic の API キーを入れると、一本を磨いて返してくれる。鍵はこの端末の中にだけ保存される。</div>
-    <input id="keyIn" type="password" placeholder="sk-ant-..." autocomplete="off">
-    <div class="label" style="margin-top:20px">引っ越し</div>
+    <div class="label">引っ越し</div>
     <textarea id="ioText" rows="3"></textarea>
     <div class="row" style="margin-top:8px"><button class="btn" id="ioOut">書き出す</button><button class="btn" id="ioIn">読み込む</button></div>
   </div>
@@ -245,14 +255,14 @@ const today = () => ymd(new Date());
 // ---- 保存 ----
 let st;
 try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { st = {}; }
-st.entries = st.entries || [];   // {date, qid, q, answers:[{t}], pick, original, polished:[{text,note}]}
+st.entries = st.entries || [];   // {date, qid, q, answers:[{t}], pick, original, versions:[言い直し]}
 st.recall  = st.recall  || {};
 st.draft   = st.draft   || null;
 if (st.hv !== 3) { st.used = []; st.hv = 3; }
 st.used    = st.used    || [];
 st.yose    = st.yose    || 0;    // 寄席の、いま見ている札
+try { localStorage.removeItem("kaeshi-key"); } catch(e) {}   // 鍵の仕組みはやめた。残っていたら消す
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
-const getKey = () => { try { return localStorage.getItem("kaeshi-key") || ""; } catch(e) { return ""; } };
 
 function hash(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
 function pickQid(salt=0){
@@ -437,85 +447,86 @@ $("decide").onclick = () => {
   fromBook = false; openPolish(entry);
 };
 
-// ---- 磨く：自分の一本を、Claude に磨いて返してもらう ----
+// ---- 磨く：無料。自分で磨く問いをめくって言い直す。頼みたいときは、いつもの Claude に渡す ----
+// 磨く問い：答えを教えず、どこを直すかだけを指す
+const POLISH = [
+  { s:"半分の長さで言うと？", n:"削った分だけ、強くなる" },
+  { s:"最後の一言、いる？", n:"言い切って止める。説明は聞かれてから" },
+  { s:"細かい事実を一つ足すなら？", n:"数字、固有名詞、昨日の一場面" },
+  { s:"いちばん意外な言葉を、最後に置くと？", n:"オチは文末に" },
+  { s:"笑いの的を、自分にすると？", n:"相手を下げずに、自分を少し下げる" },
+  { s:"「言われてみれば確かに」に着地してる？", n:"ずらしたら、本当の答えに戻る" },
+  { s:"相手に一つ返すなら、何を聞く？", n:"答えて渡すと、会話が続く" },
+  { s:"同じことを、何かに例えると？", n:"誰でも知っている物で" },
+  { s:"声に出して、3秒で言える？", n:"詰まるなら、まだ長い" },
+];
+// 気づき：手元で文を見て、よくある癖だけ知らせる
+function lint(t){
+  const out = [];
+  const len = [...t].length;
+  if (len > 45) out.push(`<b>長い</b>　${len}字。口に出すなら30字前後まで`);
+  if (/(けど|けどね|かな|かも|と思う|と思います|って感じ|みたいな|し)[。！!？?…]*$/.test(t)) out.push("<b>語尾がにごる</b>　最後を言い切ると強い");
+  if ((t.match(/[。！？!?]/g)||[]).length >= 2) out.push("<b>二文以上</b>　最後の一文は、なくても伝わる？");
+  if (/(なんか|ちょっと|とりあえず|一応|まあ)/.test(t)) out.push("<b>前置き</b>　「なんか」「一応」は削れる");
+  if (!out.length) out.push("言い切れている。あとは声に出して確かめる");
+  return out;
+}
+let pPos = 0;
 function openPolish(e){
   entry = e;
+  if (!entry.versions) entry.versions = [];
+  if (!entry.original) entry.original = entry.pick;
   $("pqLabel").textContent = e.q;
-  $("mine").textContent = e.pick; $("pcards").innerHTML = "";
-  $("polishBtn").disabled = false; $("polishBtn").textContent = e.polished ? "もう一度磨く" : "磨いてもらう";
-  $("finish").textContent = fromBook ? "もどる" : "このままでいい";
-  if (e.polished) drawPolished(e.polished);
+  pPos = hash(e.q + e.date) % POLISH.length;
+  drawPCard(); drawPolish();
+  $("finish").textContent = fromBook ? "もどる" : "これでいく";
   show("polish");
 }
-const SYSTEM = `あなたは会話の「返し」を磨く相棒。ユーザーは日常の質問への返し方を毎日練習している。
-ユーザーの一本を、本人の声と発想の芯を残したまま、口に出して言える一言に磨く。
-
-磨き方：
-- 相手の予想から一段ずらし、そのあと「言われてみれば確かに」と腑に落ちる形にする。ずれっぱなしにしない。
-- 最後は本当の答えに着地させる。
-- 話し言葉で、長くても二文。言い切って止める。言い訳・説明・前のめりな一言を最後に足さない。
-- 笑いの的は自分にする。相手を下げない。皮肉・下ネタ・自慢にしない。
-- 3本は方向を変える。たとえば「削って短く」「具体を一つ足す」「ひとひねりする」。
-- note には、どこを変えたかを一言で書く（20字以内）。
-- 同じ問いへのユーザーの他の答えも素材として使ってよい。`;
-const SCHEMA = { type:"object", additionalProperties:false, required:["versions"],
-  properties:{ versions:{ type:"array", items:{ type:"object", additionalProperties:false, required:["text","note"],
-    properties:{ text:{type:"string"}, note:{type:"string"} } } } } };
-function waitMsg(t){ const box=$("pcards"); box.innerHTML=""; const w=document.createElement("div"); w.className="wait"; w.textContent=t; box.append(w); }
-async function polish(){
-  const key = getKey();
-  if (!key) return waitMsg("ネタ帳のいちばん下で、磨く機能の鍵を入れてください");
-  $("polishBtn").disabled = true; $("polishBtn").textContent = "磨いています…";
-  waitMsg("磨いています…　十数秒かかります");
-  try {
-    const { default: Anthropic } = await import("https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk/+esm");
-    const client = new Anthropic({ apiKey: key, dangerouslyAllowBrowser: true });
-    const pick = entry.original || entry.pick;
-    const others = entry.answers.map(a=>a.t).filter(t=>t!==pick);
-    const past = st.entries.filter(x=>x!==entry).slice(-8).map(x=>`・${x.q} → ${x.pick}`).join("\n");
-    const res = await client.beta.messages.create({
-      model: "claude-opus-5-5",
-      max_tokens: 4000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "medium", format: { type: "json_schema", schema: SCHEMA } },
-      system: SYSTEM,
-      messages: [{ role: "user", content:
-        `問い：${entry.q}\n磨く一本：${pick}\n同じ問いへの他の答え：${others.join(" / ") || "なし"}\n` +
-        (past ? `最近の自分の一本（声の参考）：\n${past}\n` : "") + `3本に磨いて。` }],
-    });
-    if (res.stop_reason === "refusal") throw new Error("この一本は磨けなかった");
-    const text = (res.content.find(b=>b.type==="text")||{}).text || "";
-    const out = JSON.parse(text).versions.slice(0,3);
-    entry.polished = out; save(); drawPolished(out);
-  } catch(err) {
-    const s = err && err.status;
-    waitMsg(s===401 ? "鍵が正しくないようです。ネタ帳の下で入れ直してください"
-          : s===429 ? "混み合っています。少し置いてから、もう一度"
-          : !navigator.onLine ? "圏外です。つながってから、もう一度"
-          : "磨けなかった：" + (err && err.message ? err.message.slice(0,90) : "通信の問題"));
-  }
-  $("polishBtn").disabled = false; $("polishBtn").textContent = "もう一度磨く";
-}
-function drawPolished(list){
-  const box = $("pcards"); box.innerHTML = "";
-  list.forEach(v=>{
-    const c = document.createElement("button"); c.className = "card";
-    if (v.text === entry.pick) c.classList.add("chosen");
-    const r = document.createElement("div"); r.className="r"; r.textContent = v.text;
-    const w = document.createElement("div"); w.className="w"; w.textContent = v.note + "　｜　触れると、これに差し替える";
-    c.append(r,w);
-    c.onclick = () => {
-      if (!entry.original) entry.original = entry.pick;
-      entry.pick = v.text; save();
-      $("mine").textContent = v.text;
-      box.querySelectorAll(".card").forEach(x=>x.classList.remove("chosen")); c.classList.add("chosen");
-      if (!fromBook) $("finish").textContent = "これでいく";
-    };
-    box.append(c);
+function drawPolish(){
+  $("mine").textContent = entry.pick;
+  $("flags").innerHTML = lint(entry.pick).join("<br>");
+  const ul = $("pversions"); ul.innerHTML = "";
+  [entry.original, ...entry.versions].forEach(v=>{
+    const li = document.createElement("li"); li.textContent = v;
+    if (v === entry.pick) li.classList.add("chosen");
+    li.onclick = () => { entry.pick = v; save(); drawPolish(); };
+    ul.prepend(li);
   });
 }
-$("polishBtn").onclick = polish;
+function drawPCard(anim){
+  const p = POLISH[(pPos % POLISH.length + POLISH.length) % POLISH.length];
+  $("pS").textContent = p.s; $("pN").textContent = p.n;
+  const c = $("pcard"); c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim||"in"} .2s ease-out`;
+}
+const pNext = () => { pPos++; drawPCard("slideL"); };
+const pPrevF = () => { pPos--; drawPCard("slideR"); };
+$("pNext").onclick = pNext; $("pPrev").onclick = pPrevF;
+swipe($("pcard"), pNext, pPrevF, pNext);
+const pta = $("ptyped");
+function pcommit(){
+  const t = pta.value.trim().replace(/[。\s]+$/,"");
+  if (t && t !== entry.original && !entry.versions.includes(t)) { entry.versions.push(t); entry.pick = t; save(); }
+  pta.value = ""; pta.style.height = "auto"; drawPolish();
+}
+$("padd").onclick = pcommit;
+pta.oninput = () => { if (pta.value.includes("\n")) { pta.value = pta.value.replace(/\n/g,""); pcommit(); } else { pta.style.height="auto"; pta.style.height=pta.scrollHeight+"px"; } };
+pta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); pcommit(); } };
+
+// いつもの Claude に頼む：頼む文をコピーして、claude.ai を開く。返ってきた一本は、上の欄に言い直して足す
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.append(d); setTimeout(()=>d.remove(), 2600); }
+$("askClaude").onclick = async () => {
+  const others = (entry.answers||[]).map(a=>a.t).filter(t=>t!==entry.original);
+  const prompt =
+`会話の「返し」の練習をしています。次の一本を、私の声と発想の芯を残したまま、口に出して言える一言に3通り磨いてください。
+
+問い：${entry.q}
+私の一本：${entry.pick}
+同じ問いへの他の案：${others.join(" / ") || "なし"}
+
+磨き方：相手の予想から一段ずらして、最後は「言われてみれば確かに」と腑に落ちる本当の答えに着地させる。話し言葉で長くても二文。言い切って止め、言い訳や説明を足さない。笑いの的は自分にし、相手を下げない。3本は「削って短く」「具体を一つ足す」「ひとひねり」と方向を変え、それぞれ何を変えたかを一言添えてください。`;
+  try { await navigator.clipboard.writeText(prompt); toast("頼む文をコピーした。Claudeに貼るだけ"); } catch(e) { toast("コピーできなかった"); }
+  setTimeout(()=>{ window.open("https://claude.ai/new?q=" + encodeURIComponent(prompt), "_blank"); }, 500);
+};
 $("finish").onclick = () => {
   if (fromBook) { fromBook = false; return openBook(); }
   const n = streak();
@@ -553,11 +564,9 @@ function openBook(){
     };
     b.append(d);
   });
-  $("keyIn").value = getKey();
   show("book");
 }
 $("toBook").onclick = openBook;
-$("keyIn").onchange = () => { try { localStorage.setItem("kaeshi-key", $("keyIn").value.trim()); } catch(e){} };
 $("bookBack").onclick = () => start();
 $("ioOut").onclick = () => { $("ioText").value = JSON.stringify(st); $("ioText").select(); };
 $("ioIn").onclick = () => {

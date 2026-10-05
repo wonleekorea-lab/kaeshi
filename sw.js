@@ -1,5 +1,5 @@
 // ネット優先・キャッシュ退避。中身を変えたら CACHE を上げる。
-const CACHE = "kaeshi-v5";
+const CACHE = "kaeshi-v6";
 self.addEventListener("install", e => self.skipWaiting());
 self.addEventListener("activate", e => e.waitUntil((async () => {
   const names = await caches.keys();
