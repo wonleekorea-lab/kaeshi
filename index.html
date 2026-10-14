@@ -35,10 +35,8 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 
 .label{font-size:11px;letter-spacing:.22em;color:var(--mid);margin-bottom:10px}
 .q{font-family:var(--serif);font-size:27px;line-height:1.5;letter-spacing:.02em}
-.q.s{font-size:18px}
 .sub{font-size:13px;color:var(--mid);line-height:1.8}
 
-/* ボタン：大きく、押しやすく */
 .btn{height:54px;border-radius:14px;font-size:16px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;
   background:var(--raise);color:var(--ink);width:100%}
 .btn.ink{background:var(--ink);color:var(--bg)}
@@ -47,8 +45,15 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .row>*{flex:1}
 .textbtn{font-size:12px;color:var(--mid);letter-spacing:.1em;padding:0}
 
+/* 持ち歩いている一本と、今月のスコア */
+.stock{border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:22px}
+.stock .t{font-family:var(--serif);font-size:16px;line-height:1.6;margin:4px 0 10px}
+.stock .row .btn{height:44px;font-size:14px}
+.score{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;color:var(--mid);margin-bottom:8px}
+.score b{color:var(--ink);font-weight:600}
+
 /* 入力 */
-.box{background:var(--raise);border-radius:16px;padding:14px 16px 8px;margin-top:22px}
+.box{background:var(--raise);border-radius:16px;padding:14px 16px 8px;margin-top:20px}
 .box textarea{width:100%;background:transparent;border:none;resize:none;outline:none;overflow:hidden;
   font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink);min-height:30px}
 .box textarea::placeholder{color:var(--mid);font-size:15px}
@@ -56,7 +61,7 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .boxfoot button{font-size:13px;color:var(--mid);padding:6px 0 6px 16px}
 .acts{margin-top:12px}
 
-/* ヒント：めくる札 */
+/* ヒント */
 .hint{display:none;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:16px 16px 6px;touch-action:pan-y;user-select:none}
 .hint.on{display:block}
 .hint .s{font-family:var(--serif);font-size:19px;line-height:1.6}
@@ -68,42 +73,33 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 @keyframes slideL{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
 @keyframes slideR{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
 
-/* 答えの一覧：触ると直せる */
 .lines{list-style:none;margin-top:16px}
 .lines li{font-family:var(--serif);font-size:16px;line-height:1.6;padding:13px 2px;border-top:1px solid var(--line);animation:in .2s ease-out;cursor:pointer}
 .lines li:last-child{border-bottom:1px solid var(--line)}
 .lines li.editing{color:var(--mid)}
 
-/* 丸 */
-.circle{position:relative;width:min(88vw,400px);aspect-ratio:1;margin:8px auto}
-.circle .ring{position:absolute;inset:15%;border:1px solid var(--line);border-radius:50%}
-.circle .center{position:absolute;inset:26%;display:flex;align-items:center;justify-content:center;text-align:center;
-  padding:6px;font-family:var(--serif);font-size:16px;line-height:1.6;color:var(--mid)}
-.circle .center.sel{color:var(--ink)}
-.dot{position:absolute;transform:translate(-50%,-50%);max-width:30%;background:var(--raise);
-  padding:10px 12px;font-family:var(--serif);font-size:13px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:999px}
-.dot.sel{background:var(--ink);color:var(--bg)}
+/* 審査 */
+.step{display:flex;gap:12px;align-items:flex-start;margin-top:20px}
+.step i{font-style:normal;font-family:var(--serif);font-size:22px;line-height:1;width:22px;color:var(--mid)}
+.step div{flex:1}
+.paste{width:100%;min-height:120px;background:var(--raise);color:var(--ink);border:none;border-radius:14px;padding:12px;font-size:13px;line-height:1.6;outline:none;margin-top:8px}
 
-/* 磨く */
-.mine{font-family:var(--serif);font-size:21px;line-height:1.65}
-.cards{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-.card{text-align:left;width:100%;padding:16px;border-radius:16px;background:var(--raise);animation:in .25s ease-out}
-.card .r{font-family:var(--serif);font-size:17px;line-height:1.7}
-.card .w{font-size:12px;color:var(--mid);margin-top:8px;line-height:1.6}
-.card.chosen{outline:1.5px solid var(--ink)}
-.flags{font-size:12px;color:var(--mid);line-height:1.8;margin-top:10px}
-.flags b{color:var(--ink);font-weight:500}
-.lines li.chosen{color:var(--ink);font-weight:600}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:20;animation:in .2s ease-out}
-.wait{font-size:13px;color:var(--mid);letter-spacing:.1em;text-align:center;padding:30px 0;line-height:1.8}
+/* 結果 */
+.verdict{font-family:var(--serif);font-size:44px;line-height:1.1}
+.vs{font-size:13px;color:var(--mid);margin-top:8px;line-height:1.7}
+.valid{font-size:11px;letter-spacing:.06em;color:var(--mid);margin-top:10px;line-height:1.7}
+.rank{list-style:none;margin-top:18px}
+.rank li{padding:12px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:34px 1fr;gap:4px 8px;animation:in .25s ease-out both}
+.rank li:last-child{border-bottom:1px solid var(--line)}
+.rank .no{font-family:var(--serif);font-size:20px;color:var(--mid);grid-row:span 2}
+.rank .r{font-family:var(--serif);font-size:16px;line-height:1.6}
+.rank .m{font-size:11px;color:var(--mid);line-height:1.6}
+.rank .m b{color:var(--ink);font-weight:600;letter-spacing:.06em}
+.rank li.me .r{font-weight:600}
+.rank li.me{cursor:pointer}
+.rank li.pick{outline:1.5px solid var(--ink);outline-offset:4px;border-radius:4px}
 
-/* 思い出す */
-.reveal{margin-top:22px;min-height:80px;font-family:var(--serif);font-size:20px;line-height:1.65}
-.reveal.hide{color:transparent;text-shadow:0 0 14px var(--mid);user-select:none}
-
-/* おわり・ネタ帳 */
-.big{font-family:var(--serif);font-size:72px;text-align:center;line-height:1}
-.center-t{text-align:center;margin-top:16px}
+/* ネタ帳 */
 .book-item{padding:14px 0;border-top:1px solid var(--line)}
 .book-item .d{font-size:10px;color:var(--mid);letter-spacing:.12em}
 .book-item .qq{font-size:12px;color:var(--mid);margin:4px 0}
@@ -111,10 +107,13 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .book-item .aa[contenteditable=true]{background:var(--raise);padding:8px 10px}
 .book-item .tools{display:flex;gap:22px;margin-top:2px}
 .book-item .tools button{font-size:13px;color:var(--mid);padding:10px 0}
+.report{background:var(--raise);border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.8;margin-bottom:12px}
+.report b{font-family:var(--serif);font-size:18px;font-weight:600}
 .set{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
-.set input,.set textarea{width:100%;background:var(--raise);color:var(--ink);border:none;border-radius:10px;padding:12px;font-size:13px;margin-top:8px;outline:none}
+.set textarea{width:100%;background:var(--raise);color:var(--ink);border:none;border-radius:10px;padding:12px;font-size:13px;margin-top:8px;outline:none}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:20;animation:in .2s ease-out;white-space:nowrap}
 
-/* 寄席：下から引き上げる */
+/* 寄席 */
 .handle{position:fixed;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom));display:flex;flex-direction:column;
   align-items:center;padding-top:12px;gap:7px;background:linear-gradient(transparent,var(--bg) 45%);touch-action:none;z-index:5;cursor:pointer}
 .handle i{width:38px;height:4px;border-radius:2px;background:var(--mid);opacity:.5}
@@ -144,22 +143,16 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 </header>
 <main>
 
-<section class="screen" id="s-recall">
+<!-- 試合：問いに3本で挑む -->
+<section class="screen" id="s-match">
   <div class="mid-col">
-    <div class="label">きのうの一本　見ずに、口に出す</div>
-    <div class="q" id="rq"></div>
-    <div class="reveal hide" id="ra"></div>
-  </div>
-  <div id="rfoot1"><button class="btn ink" id="rShow">言った。答えを見る</button></div>
-  <div class="row" id="rfoot2" style="display:none">
-    <button class="btn" id="rNo">出なかった</button>
-    <button class="btn ink" id="rYes">言えた</button>
-  </div>
-</section>
-
-<section class="screen" id="s-ask">
-  <div class="mid-col">
-    <div class="label" style="display:flex;justify-content:space-between"><span>きょうの問い</span><button class="textbtn" id="reroll">別の問い</button></div>
+    <div class="score"><span>今月ウケた　<b id="hits">0</b>回</span><span id="wl"></span></div>
+    <div class="stock" id="stock" style="display:none">
+      <div class="label" style="margin:0">持って出ている一本　使ったら押す</div>
+      <div class="t" id="stockT"></div>
+      <div class="row"><button class="btn" id="miss">すべった</button><button class="btn ink" id="hit">ウケた</button></div>
+    </div>
+    <div class="label" style="display:flex;justify-content:space-between"><span>きょうの試合　3本で挑む</span><button class="textbtn" id="reroll">別の問い</button></div>
     <div class="q" id="q"></div>
     <div class="box">
       <textarea id="typed" rows="1" placeholder="キーボードのマイクで答える" enterkeyhint="done"></textarea>
@@ -174,52 +167,42 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
       <div class="nav"><button id="hPrev" aria-label="前のヒント">‹</button><span>触れる・払うと次へ</span><button id="hNext" aria-label="次のヒント">›</button></div>
     </div>
     <ul class="lines" id="answers"></ul>
-    <div style="margin-top:16px"><button class="btn" id="toPick" disabled>一本えらぶ</button></div>
+    <div style="margin-top:16px"><button class="btn" id="toJudge" disabled>審査に出す</button></div>
   </div>
 </section>
 
-<section class="screen" id="s-pick">
+<!-- 審査：claude.ai で伏せて審査 -->
+<section class="screen" id="s-judge">
   <div class="mid-col">
-    <div class="label">一本えらぶ</div>
-    <div class="q s" id="pq"></div>
-    <div class="circle" id="circle"><div class="ring"></div><div class="center" id="center">触れて、えらぶ</div></div>
+    <div class="label">審査</div>
+    <div class="sub">あなたの答えを、ライバルの3本と答え合わせの札2本に混ぜて、誰のものか伏せて出します。</div>
+    <div class="step"><i>一</i><div><button class="btn ink" id="openClaude">頼む文をコピーして Claude を開く</button>
+      <div class="sub" style="margin-top:6px">新しいチャットに貼って送るだけ</div></div></div>
+    <div class="step"><i>二</i><div><div class="sub">返ってきた答えを、まるごと貼る</div>
+      <textarea class="paste" id="pasteIn" placeholder="A: 3人｜…&#10;順位: C>A>…"></textarea></div></div>
   </div>
   <div class="row">
-    <button class="btn" id="back">もっと言う</button>
-    <button class="btn ink" id="decide" disabled>これにする</button>
+    <button class="btn" id="judgeBack">もどる</button>
+    <button class="btn ink" id="showResult">結果を見る</button>
   </div>
 </section>
 
-<section class="screen" id="s-polish">
+<!-- 結果 -->
+<section class="screen" id="s-result">
   <div class="mid-col">
-    <div class="label" id="pqLabel">あなたの一本</div>
-    <div class="mine" id="mine"></div>
-    <div class="flags" id="flags"></div>
-    <div class="hint on" id="pcard">
-      <div class="s" id="pS"></div><div class="n" id="pN"></div>
-      <div class="nav"><button id="pPrev" aria-label="前">‹</button><span>磨く問い　触れる・払うと次へ</span><button id="pNext" aria-label="次">›</button></div>
-    </div>
-    <div class="box" style="margin-top:12px">
-      <textarea id="ptyped" rows="1" placeholder="言い直して、足す" enterkeyhint="done"></textarea>
-      <div class="boxfoot"><span>触れると、その一本に差し替え</span><button id="padd">足す</button></div>
-    </div>
-    <ul class="lines" id="pversions"></ul>
+    <div class="verdict" id="verdict"></div>
+    <div class="vs" id="vsLine"></div>
+    <div class="valid" id="validLine"></div>
+    <ul class="rank" id="rankList"></ul>
+    <div class="sub" style="margin-top:12px">自分の答えに触れると、それを持って出る一本にする</div>
   </div>
-  <div class="row">
-    <button class="btn" id="askClaude">Claudeに頼む</button>
-    <button class="btn ink" id="finish">これでいく</button>
-  </div>
+  <button class="btn ink" id="carry">この一本を持って出る</button>
 </section>
 
-<section class="screen" id="s-done">
-  <div class="mid-col">
-    <div class="big" id="dnum"></div>
-    <div class="sub center-t" id="dtext"></div>
-  </div>
-  <button class="btn" id="again">もう一問</button>
-</section>
-
+<!-- ネタ帳 -->
 <section class="screen" id="s-book">
+  <div class="label" style="margin-top:14px">審査員の成績</div>
+  <div class="report" id="report"></div>
   <div class="label" id="bookHead" style="margin-top:14px">ネタ帳</div>
   <div id="book"></div>
   <div class="set">
@@ -245,26 +228,29 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 
 <script src="data.js"></script>
 <script src="hints.js"></script>
+<script src="judge.js"></script>
 <script src="yose.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const KEY = "kaeshi-v1";
+const KEY = "kaeshi-v2";
 const ymd = d => new Date(d - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
 const today = () => ymd(new Date());
+const LABELS = "ABCDEFGH".split("");
 
 // ---- 保存 ----
+// entries: {date,qid,q,items:[{label,who,setup,r}],n:{A:3..},order,notes,valid,result,pick,predict,outcome:"hit"|"miss"|null,usedAt}
 let st;
 try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { st = {}; }
-st.entries = st.entries || [];   // {date, qid, q, answers:[{t}], pick, original, versions:[言い直し]}
-st.recall  = st.recall  || {};
-st.draft   = st.draft   || null;
-if (st.hv !== 3) { st.used = []; st.hv = 3; }
+st.entries = st.entries || [];
+st.draft   = st.draft   || null;   // {date,qid,answers:[{t}],items,pasted}
 st.used    = st.used    || [];
-st.yose    = st.yose    || 0;    // 寄席の、いま見ている札
-try { localStorage.removeItem("kaeshi-key"); } catch(e) {}   // 鍵の仕組みはやめた。残っていたら消す
+st.yose    = st.yose    || 0;
+st.stock   = st.stock   ?? null;   // 持って出ている一本：entries の添字
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
+try { localStorage.removeItem("kaeshi-key"); } catch(e) {}
 
 function hash(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+function rng(seed){ let x = seed || 1; return () => (x = Math.imul(x ^ (x>>>15), 2246822507) + 0x6D2B79F5 >>> 0) / 4294967296; }
 function pickQid(salt=0){
   const done = new Set(st.entries.map(e=>e.qid));
   let pool = QUESTIONS.filter(q=>!done.has(q.id));
@@ -272,21 +258,8 @@ function pickQid(salt=0){
   return pool[hash(today()+":"+salt) % pool.length].id;
 }
 const Q = id => QUESTIONS.find(q=>q.id===id);
-
-function show(name){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id==="s-"+name));
-  window.scrollTo(0,0);
-}
-function streak(){
-  const days = new Set(st.entries.map(e=>e.date));
-  let n=0, d=new Date();
-  if (!days.has(today())) d.setDate(d.getDate()-1);
-  while (days.has(ymd(d))) { n++; d.setDate(d.getDate()-1); }
-  $("streak").textContent = n ? `返し　${n}日目` : "返し";
-  return n;
-}
-
-// 左右に払う・触れるを受ける（ヒントの札と寄席の札で使う）
+function show(name){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id==="s-"+name)); window.scrollTo(0,0); }
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.append(d); setTimeout(()=>d.remove(), 2600); }
 function swipe(el, onLeft, onRight, onTap){
   let x0=null, y0=0, t0=0, touched=false;
   el.addEventListener("touchstart", e=>{ touched=true; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
@@ -300,81 +273,79 @@ function swipe(el, onLeft, onRight, onTap){
   el.addEventListener("click", e=>{ if (!touched && onTap && !e.target.closest("button,a")) onTap(); });
 }
 
-// ---- 起動 ----
+// ---- 上の段：今月のスコアと、持って出ている一本 ----
+function drawTop(){
+  const month = today().slice(0,7);
+  $("hits").textContent = st.entries.filter(e=>e.outcome==="hit" && (e.usedAt||"").startsWith(month)).length;
+  const w = st.entries.filter(e=>e.result==="勝ち").length, l = st.entries.filter(e=>e.result==="負け").length;
+  $("wl").textContent = st.entries.length ? `対ライバル ${w}勝${l}敗` : "";
+  const days = new Set(st.entries.map(e=>e.date)); let n=0, d=new Date();
+  if (!days.has(today())) d.setDate(d.getDate()-1);
+  while (days.has(ymd(d))) { n++; d.setDate(d.getDate()-1); }
+  $("streak").textContent = n ? `返し　${n}日目` : "返し";
+  const s = st.stock!==null ? st.entries[st.stock] : null;
+  $("stock").style.display = s && !s.outcome ? "" : "none";
+  if (s) $("stockT").textContent = `「${s.pick}」　予測 ${s.predict ?? "?"}人`;
+}
+function useStock(outcome){
+  const s = st.entries[st.stock]; if (!s) return;
+  s.outcome = outcome; s.usedAt = today(); st.stock = null; save(); drawTop();
+  toast(outcome==="hit" ? "ウケた。1回" : "すべった。記録した");
+}
+$("hit").onclick = () => useStock("hit");
+$("miss").onclick = () => useStock("miss");
+
+// ---- 試合 ----
 let cur, salt = 0;
 function start(){
-  streak();
-  const due = st.entries.findIndex(e => e.date < today() && !e.recalled && (e.nextRecall||"") <= today());
-  if (due >= 0 && st.recall.date !== today()) return showRecall(due);
-  beginAsk();
-}
-function beginAsk(){
   if (st.draft && st.draft.date === today()) cur = st.draft;
   else { cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save(); }
-  resetHint(); endEdit(); renderAsk(); show("ask");
+  resetHint(); endEdit(); renderMatch(); drawTop(); show("match");
 }
-
-// ---- 思い出す ----
-let rIdx;
-function showRecall(i){
-  rIdx = i; const e = st.entries[i];
-  $("rq").textContent = e.q; $("ra").textContent = e.pick; $("ra").classList.add("hide");
-  $("rfoot1").style.display=""; $("rfoot2").style.display="none";
-  show("recall");
-}
-$("rShow").onclick = () => { $("ra").classList.remove("hide"); $("rfoot1").style.display="none"; $("rfoot2").style.display="flex"; };
-function recallDone(ok){
-  const e = st.entries[rIdx];
-  if (ok) e.hits = (e.hits||0)+1;
-  // 言えたら3日後にもう一度、2回言えたら卒業。出なければ翌日また
-  if (ok && e.hits >= 2) e.recalled = true;
-  else { const d=new Date(); d.setDate(d.getDate()+(ok?3:1)); e.nextRecall = ymd(d); }
-  st.recall.date = today(); save(); beginAsk();
-}
-$("rYes").onclick = () => recallDone(true);
-$("rNo").onclick  = () => recallDone(false);
-
-// ---- 答える／直す ----
 const ta = $("typed");
 let editIdx = null;
-function renderAsk(){
+function renderMatch(){
   $("q").textContent = Q(cur.qid).q;
   const box = $("answers"); box.innerHTML = "";
   cur.answers.forEach((a,i)=>{
     const li=document.createElement("li"); li.textContent = a.t;
     if (i===editIdx) li.classList.add("editing");
     li.onclick = () => startEdit(i);
-    box.prepend(li);                       // 新しい答えを上に
+    box.append(li);
   });
   const n = cur.answers.length;
-  $("count").textContent = editIdx!==null ? "直している" : n===0 ? "" : n<3 ? `${n}本　まず3本　触れると直せる` : `${n}本　触れると直せる`;
-  $("toPick").disabled = n<2;
-  $("toPick").classList.toggle("ink", n>=3);
+  $("count").textContent = editIdx!==null ? "直している" : n<3 ? `${n} / 3本` : "3本そろった　触れると直せる";
+  $("add").disabled = n>=3 && editIdx===null;
+  $("toJudge").disabled = n<1;
+  $("toJudge").classList.toggle("ink", n>=3);
 }
 const grow = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; };
 function commit(){
   const t = ta.value.trim().replace(/[。\s]+$/,"");
   if (t) {
-    if (editIdx!==null) cur.answers[editIdx].t = t; else cur.answers.push({ t });
-    st.draft = cur; save();
+    if (editIdx!==null) cur.answers[editIdx].t = t; else if (cur.answers.length<3) cur.answers.push({ t });
+    cur.items = null; st.draft = cur; save();
   }
-  ta.value = ""; grow(); endEdit(); renderAsk();
+  ta.value = ""; grow(); endEdit(); renderMatch();
 }
 function startEdit(i){
   editIdx = i; ta.value = cur.answers[i].t; grow(); ta.focus();
   $("add").textContent = "直す"; $("delBtn").style.display=""; $("cancelBtn").style.display="";
-  renderAsk();
+  renderMatch();
 }
-function endEdit(){
-  editIdx = null; $("add").textContent = "足す"; $("delBtn").style.display="none"; $("cancelBtn").style.display="none";
-}
-$("delBtn").onclick = () => { cur.answers.splice(editIdx,1); st.draft=cur; save(); ta.value=""; grow(); endEdit(); renderAsk(); };
-$("cancelBtn").onclick = () => { ta.value=""; grow(); endEdit(); renderAsk(); };
+function endEdit(){ editIdx = null; $("add").textContent = "足す"; $("delBtn").style.display="none"; $("cancelBtn").style.display="none"; }
+$("delBtn").onclick = () => { cur.answers.splice(editIdx,1); cur.items=null; st.draft=cur; save(); ta.value=""; grow(); endEdit(); renderMatch(); };
+$("cancelBtn").onclick = () => { ta.value=""; grow(); endEdit(); renderMatch(); };
 $("add").onclick = commit;
 ta.oninput = () => { if (ta.value.includes("\n")) { ta.value = ta.value.replace(/\n/g,""); commit(); } else grow(); };
 ta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); commit(); } };
+$("reroll").onclick = () => {
+  if (cur.answers.length && !confirm("いまの答えは消えます。別の問いにしますか？")) return;
+  salt++; cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save();
+  resetHint(); endEdit(); renderMatch();
+};
 
-// ---- ヒント：触れる・左右に払う・‹ › でテンポよくめくる ----
+// ---- ヒント ----
 let hHist = [], hPos = -1, lastType = "";
 function resetHint(){ hHist=[]; hPos=-1; lastType=""; $("hint").classList.remove("on"); $("hintBtn").textContent="ヒント"; }
 function freshHint(){
@@ -395,172 +366,121 @@ function freshHint(){
 function drawHint(anim){
   const h = hHist[hPos], c = $("hint");
   $("hintS").textContent = h.s; $("hintN").textContent = h.n || "";
-  c.classList.add("on");
-  c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim} .2s ease-out`;
+  c.classList.add("on"); c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim} .2s ease-out`;
   $("hPrev").style.visibility = hPos>0 ? "visible" : "hidden";
 }
-function hintNext(){
-  if (hPos < hHist.length-1) hPos++; else { hHist.push(freshHint()); hPos = hHist.length-1; }
-  drawHint("slideL"); $("hintBtn").textContent = "次のヒント";
-}
+function hintNext(){ if (hPos < hHist.length-1) hPos++; else { hHist.push(freshHint()); hPos = hHist.length-1; } drawHint("slideL"); $("hintBtn").textContent = "次のヒント"; }
 function hintPrev(){ if (hPos>0){ hPos--; drawHint("slideR"); } }
-$("hintBtn").onclick = hintNext;
-$("hNext").onclick = hintNext;
-$("hPrev").onclick = hintPrev;
+$("hintBtn").onclick = hintNext; $("hNext").onclick = hintNext; $("hPrev").onclick = hintPrev;
 swipe($("hint"), hintNext, hintPrev, hintNext);
 
-$("reroll").onclick = () => {
-  if (cur.answers.length && !confirm("いまの答えは消えます。別の問いにしますか？")) return;
-  salt++; cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save();
-  resetHint(); endEdit(); renderAsk();
+// ---- 審査：伏せて混ぜる ----
+function buildItems(){
+  const q = Q(cur.qid), set = `初対面の飲み会で「${q.q}」と聞かれた。`;
+  const r = rng(hash(cur.date + cur.qid + cur.answers.map(a=>a.t).join("|")));
+  const anchor = ANCHORS[Math.floor(r()*ANCHORS.length)];
+  const items = [
+    ...cur.answers.map(a=>({ who:"あなた", setup:set, r:a.t })),
+    ...q.m.map(m=>({ who:"ライバル", setup:set, r:m.r })),
+    { who:"ウケた札", setup:anchor.setup, r:anchor.r },
+    { who:"つまらない札", setup:set, r:FLAT[cur.qid] || "普通です" },
+  ];
+  for (let i=items.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+  items.forEach((it,i)=>it.label=LABELS[i]);
+  return items;
+}
+$("toJudge").onclick = () => {
+  if (ta.value.trim()) commit();
+  if (!cur.items) { cur.items = buildItems(); st.draft = cur; save(); }
+  $("pasteIn").value = cur.pasted || "";
+  show("judge");
 };
+$("judgeBack").onclick = () => show("match");
+$("openClaude").onclick = async () => {
+  const p = judgePrompt(cur.items);
+  try { await navigator.clipboard.writeText(p); toast("コピーした。新しいチャットに貼って送る"); } catch(e) { toast("コピーできなかった"); }
+  setTimeout(()=>window.open("https://claude.ai/new?q="+encodeURIComponent(p), "_blank"), 500);
+};
+$("pasteIn").oninput = () => { cur.pasted = $("pasteIn").value; st.draft = cur; save(); };
 
-// ---- 丸から一本 ----
-let sel = -1;
-$("toPick").onclick = () => { if (ta.value.trim()) commit(); renderPick(); show("pick"); };
-function renderPick(){
-  $("pq").textContent = Q(cur.qid).q;
-  const c = $("circle"); c.querySelectorAll(".dot").forEach(d=>d.remove());
-  sel = -1; $("decide").disabled = true; $("center").textContent = "触れて、えらぶ"; $("center").classList.remove("sel");
-  const n = cur.answers.length;
-  cur.answers.forEach((a,i)=>{
-    const ang = -Math.PI/2 + i*2*Math.PI/n;
-    const r = n>8 && i%2 ? 27 : 35;
-    const d = document.createElement("button"); d.className="dot";
-    d.style.left = (50 + r*Math.cos(ang))+"%"; d.style.top = (50 + r*Math.sin(ang))+"%";
-    d.textContent = a.t;
-    d.onclick = () => {
-      c.querySelectorAll(".dot").forEach(x=>x.classList.remove("sel")); d.classList.add("sel");
-      sel = i; $("center").textContent = a.t; $("center").classList.add("sel"); $("decide").disabled = false;
-    };
-    c.append(d);
+// ---- 結果 ----
+let resEntry = null;
+$("showResult").onclick = () => {
+  const text = $("pasteIn").value.trim();
+  const labels = cur.items.map(i=>i.label);
+  const j = parseJudge(text, labels);
+  if (!j.ok) return toast("人数が全部読めなかった。まるごと貼る");
+  const pos = l => j.order.indexOf(l);
+  const by = w => cur.items.filter(i=>i.who===w);
+  const anchor = by("ウケた札")[0], flat = by("つまらない札")[0];
+  const half = cur.items.length/2;
+  // 審査員の検査：ウケた札が上半分、つまらない札が下半分に置かれた日だけ有効
+  const valid = pos(anchor.label) < half && pos(flat.label) >= half;
+  const best = w => Math.max(...by(w).map(i=>j.n[i.label]));
+  const me = best("あなた"), rival = best("ライバル");
+  const result = me>rival ? "勝ち" : me<rival ? "負け" : "引き分け";
+  const mine = by("あなた").sort((a,b)=>pos(a.label)-pos(b.label));
+  resEntry = { date: cur.date, qid: cur.qid, q: Q(cur.qid).q, items: cur.items, n: j.n, order: j.order,
+               notes: text, valid, result, pick: mine[0].r, predict: j.n[mine[0].label], outcome: null };
+  st.entries.push(resEntry); st.draft = null; save();
+  drawResult(j, valid, result, me, rival);
+};
+function drawResult(j, valid, result, me, rival){
+  $("verdict").textContent = valid ? result : `${result}（参考）`;
+  $("vsLine").textContent = `あなたの最高 ${me}人　対　ライバルの最高 ${rival}人`;
+  $("validLine").textContent = valid
+    ? "審査員は、ウケた札を上に・つまらない札を下に置けた。この判定は信用していい"
+    : "審査員が答え合わせの札を外した。今日の判定は参考まで";
+  const ul = $("rankList"); ul.innerHTML = "";
+  const lines = {}; for (const m of (resEntry.notes||"").matchAll(/([A-H])\s*[:：]\s*\d{1,2}\s*人\s*[｜|]\s*(.+)/g)) lines[m[1]] = m[2].trim();
+  j.order.forEach((l,k)=>{
+    const it = resEntry.items.find(i=>i.label===l); if (!it) return;
+    const li = document.createElement("li"); if (it.who==="あなた") li.classList.add("me");
+    li.style.animationDelay = (k*90)+"ms";
+    li.innerHTML = `<span class="no"></span><span class="r"></span><span class="m"></span>`;
+    li.querySelector(".no").textContent = k+1;
+    li.querySelector(".r").textContent = it.r;
+    const m = li.querySelector(".m"); const b=document.createElement("b"); b.textContent = `${it.who}　${j.n[l]}人`; m.append(b, lines[l] ? "　" + lines[l] : "");
+    if (it.who==="あなた") {
+      if (it.r===resEntry.pick) li.classList.add("pick");
+      li.onclick = () => { resEntry.pick = it.r; resEntry.predict = j.n[l]; save(); ul.querySelectorAll("li").forEach(x=>x.classList.remove("pick")); li.classList.add("pick"); };
+    }
+    ul.append(li);
   });
+  show("result");
 }
-$("back").onclick = () => show("ask");
-let entry = null, fromBook = false;
-$("decide").onclick = () => {
-  if (!st.draft || sel < 0) return;
-  $("decide").disabled = true;
-  const a = cur.answers[sel], q = Q(cur.qid);
-  entry = { date: cur.date, qid: cur.qid, q: q.q, answers: cur.answers, pick: a.t };
-  st.entries.push(entry); st.draft = null; save(); streak();
-  fromBook = false; openPolish(entry);
-};
+$("carry").onclick = () => { st.stock = st.entries.indexOf(resEntry); save(); salt++; start(); toast("持って出る。使ったら押す"); };
 
-// ---- 磨く：無料。自分で磨く問いをめくって言い直す。頼みたいときは、いつもの Claude に渡す ----
-// 磨く問い：答えを教えず、どこを直すかだけを指す
-const POLISH = [
-  { s:"半分の長さで言うと？", n:"削った分だけ、強くなる" },
-  { s:"最後の一言、いる？", n:"言い切って止める。説明は聞かれてから" },
-  { s:"細かい事実を一つ足すなら？", n:"数字、固有名詞、昨日の一場面" },
-  { s:"いちばん意外な言葉を、最後に置くと？", n:"オチは文末に" },
-  { s:"笑いの的を、自分にすると？", n:"相手を下げずに、自分を少し下げる" },
-  { s:"「言われてみれば確かに」に着地してる？", n:"ずらしたら、本当の答えに戻る" },
-  { s:"相手に一つ返すなら、何を聞く？", n:"答えて渡すと、会話が続く" },
-  { s:"同じことを、何かに例えると？", n:"誰でも知っている物で" },
-  { s:"声に出して、3秒で言える？", n:"詰まるなら、まだ長い" },
-];
-// 気づき：手元で文を見て、よくある癖だけ知らせる
-function lint(t){
-  const out = [];
-  const len = [...t].length;
-  if (len > 45) out.push(`<b>長い</b>　${len}字。口に出すなら30字前後まで`);
-  if (/(けど|けどね|かな|かも|と思う|と思います|って感じ|みたいな|し)[。！!？?…]*$/.test(t)) out.push("<b>語尾がにごる</b>　最後を言い切ると強い");
-  if ((t.match(/[。！？!?]/g)||[]).length >= 2) out.push("<b>二文以上</b>　最後の一文は、なくても伝わる？");
-  if (/(なんか|ちょっと|とりあえず|一応|まあ)/.test(t)) out.push("<b>前置き</b>　「なんか」「一応」は削れる");
-  if (!out.length) out.push("言い切れている。あとは声に出して確かめる");
-  return out;
-}
-let pPos = 0;
-function openPolish(e){
-  entry = e;
-  if (!entry.versions) entry.versions = [];
-  if (!entry.original) entry.original = entry.pick;
-  $("pqLabel").textContent = e.q;
-  pPos = hash(e.q + e.date) % POLISH.length;
-  drawPCard(); drawPolish();
-  $("finish").textContent = fromBook ? "もどる" : "これでいく";
-  show("polish");
-}
-function drawPolish(){
-  $("mine").textContent = entry.pick;
-  $("flags").innerHTML = lint(entry.pick).join("<br>");
-  const ul = $("pversions"); ul.innerHTML = "";
-  [entry.original, ...entry.versions].forEach(v=>{
-    const li = document.createElement("li"); li.textContent = v;
-    if (v === entry.pick) li.classList.add("chosen");
-    li.onclick = () => { entry.pick = v; save(); drawPolish(); };
-    ul.prepend(li);
-  });
-}
-function drawPCard(anim){
-  const p = POLISH[(pPos % POLISH.length + POLISH.length) % POLISH.length];
-  $("pS").textContent = p.s; $("pN").textContent = p.n;
-  const c = $("pcard"); c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim||"in"} .2s ease-out`;
-}
-const pNext = () => { pPos++; drawPCard("slideL"); };
-const pPrevF = () => { pPos--; drawPCard("slideR"); };
-$("pNext").onclick = pNext; $("pPrev").onclick = pPrevF;
-swipe($("pcard"), pNext, pPrevF, pNext);
-const pta = $("ptyped");
-function pcommit(){
-  const t = pta.value.trim().replace(/[。\s]+$/,"");
-  if (t && t !== entry.original && !entry.versions.includes(t)) { entry.versions.push(t); entry.pick = t; save(); }
-  pta.value = ""; pta.style.height = "auto"; drawPolish();
-}
-$("padd").onclick = pcommit;
-pta.oninput = () => { if (pta.value.includes("\n")) { pta.value = pta.value.replace(/\n/g,""); pcommit(); } else { pta.style.height="auto"; pta.style.height=pta.scrollHeight+"px"; } };
-pta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); pcommit(); } };
-
-// いつもの Claude に頼む：頼む文をコピーして、claude.ai を開く。返ってきた一本は、上の欄に言い直して足す
-function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.append(d); setTimeout(()=>d.remove(), 2600); }
-$("askClaude").onclick = async () => {
-  const others = (entry.answers||[]).map(a=>a.t).filter(t=>t!==entry.original);
-  const prompt =
-`会話の「返し」の練習をしています。次の一本を、私の声と発想の芯を残したまま、口に出して言える一言に3通り磨いてください。
-
-問い：${entry.q}
-私の一本：${entry.pick}
-同じ問いへの他の案：${others.join(" / ") || "なし"}
-
-磨き方：相手の予想から一段ずらして、最後は「言われてみれば確かに」と腑に落ちる本当の答えに着地させる。話し言葉で長くても二文。言い切って止め、言い訳や説明を足さない。笑いの的は自分にし、相手を下げない。3本は「削って短く」「具体を一つ足す」「ひとひねり」と方向を変え、それぞれ何を変えたかを一言添えてください。`;
-  try { await navigator.clipboard.writeText(prompt); toast("頼む文をコピーした。Claudeに貼るだけ"); } catch(e) { toast("コピーできなかった"); }
-  setTimeout(()=>{ window.open("https://claude.ai/new?q=" + encodeURIComponent(prompt), "_blank"); }, 500);
-};
-$("finish").onclick = () => {
-  if (fromBook) { fromBook = false; return openBook(); }
-  const n = streak();
-  $("dnum").textContent = st.entries.length;
-  $("dtext").innerHTML = `本目が、ネタ帳に。<br>${n>1?`${n}日つづいている。<br>`:""}あした、見ずに言えるか。`;
-  show("done");
-};
-$("again").onclick = () => { salt++; beginAsk(); };
-
-// ---- ネタ帳：直す・磨く・消す ----
+// ---- ネタ帳と、審査員の成績 ----
 function openBook(){
+  const used = st.entries.filter(e=>e.outcome);
+  const hit = used.filter(e=>e.outcome==="hit"), miss = used.filter(e=>e.outcome==="miss");
+  const avg = a => a.length ? (a.reduce((s,e)=>s+(e.predict||0),0)/a.length).toFixed(1) : "—";
+  const validRate = st.entries.length ? Math.round(100*st.entries.filter(e=>e.valid).length/st.entries.length) : 0;
+  $("report").innerHTML = used.length < 3
+    ? `実戦で使った記録が3回たまると、審査員の予測が当たっているかがここに出る。いま ${used.length}回。<br>答え合わせの札を正しく置けた日　${validRate}%`
+    : `ウケた一本の予測　平均 <b>${avg(hit)}</b>人<br>すべった一本の予測　平均 <b>${avg(miss)}</b>人<br>${(+avg(hit)||0) > (+avg(miss)||0) ? "ウケた方を高く予測できている。審査員は信用していい" : "まだ当たっていない。判定は割り引いて見る"}<br>答え合わせの札を正しく置けた日　${validRate}%`;
   const b = $("book"); b.innerHTML = "";
   $("bookHead").textContent = `ネタ帳　${st.entries.length}本`;
-  if (!st.entries.length) b.innerHTML = `<p class="sub">まだ空。一本えらぶと、ここに入る。</p>`;
+  if (!st.entries.length) b.innerHTML = `<p class="sub">まだ空。試合を一回やると、ここに入る。</p>`;
   [...st.entries].reverse().forEach(e=>{
     const d = document.createElement("div"); d.className="book-item";
-    d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div><div class="tools"><button data-a="edit">直す</button><button data-a="polish">磨く</button><button data-a="del">消す</button></div>`;
-    d.querySelector(".d").textContent = e.date + (e.recalled?"　身についた":"");
+    d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div><div class="tools"><button data-a="carry">持って出る</button><button data-a="edit">直す</button><button data-a="del">消す</button></div>`;
+    const out = e.outcome==="hit" ? "　ウケた" : e.outcome==="miss" ? "　すべった" : "";
+    d.querySelector(".d").textContent = `${e.date}　${e.result||""}${e.valid?"":"（参考）"}　予測${e.predict??"?"}人${out}`;
     d.querySelector(".qq").textContent = e.q;
     const aa = d.querySelector(".aa"); aa.textContent = e.pick;
     const editBtn = d.querySelector('[data-a=edit]');
     editBtn.onclick = () => {
-      if (aa.isContentEditable) {
-        const t = aa.textContent.trim(); if (t) { e.pick = t; save(); }
-        aa.contentEditable = "false"; editBtn.textContent = "直す";
-      } else {
-        aa.contentEditable = "true"; aa.focus(); editBtn.textContent = "保存";
-        const r=document.createRange(); r.selectNodeContents(aa); r.collapse(false); const s=getSelection(); s.removeAllRanges(); s.addRange(r);
-      }
+      if (aa.isContentEditable) { const t = aa.textContent.trim(); if (t) { e.pick = t; save(); } aa.contentEditable = "false"; editBtn.textContent = "直す"; }
+      else { aa.contentEditable = "true"; aa.focus(); editBtn.textContent = "保存"; }
     };
-    d.querySelector('[data-a=polish]').onclick = () => { fromBook = true; openPolish(e); };
+    d.querySelector('[data-a=carry]').onclick = () => { e.outcome = null; st.stock = st.entries.indexOf(e); save(); toast("持って出る。使ったら押す"); start(); };
     d.querySelector('[data-a=del]').onclick = () => {
       if (!confirm("この一本を消しますか？")) return;
-      st.entries.splice(st.entries.indexOf(e),1); save(); streak(); openBook();
+      const i = st.entries.indexOf(e); st.entries.splice(i,1);
+      if (st.stock===i) st.stock=null; else if (st.stock>i) st.stock--;
+      save(); openBook();
     };
     b.append(d);
   });
@@ -572,12 +492,11 @@ $("ioOut").onclick = () => { $("ioText").value = JSON.stringify(st); $("ioText")
 $("ioIn").onclick = () => {
   try { const v = JSON.parse($("ioText").value); if(!v.entries) throw 0;
     if (!confirm("いまの記録を置き換えます。よいですか？")) return;
-    st = v; st.used = st.used || []; save(); start();
+    st = v; save(); start();
   } catch(e){ alert("読み込めない形式です"); }
 };
 
-// ---- 寄席：下から引き上げて、めくって楽しむ ----
-// 国も時代も混ざるように、決まった順で混ぜる
+// ---- 寄席 ----
 const DECK = ((typeof YOSE !== "undefined" && YOSE) || []).slice().sort((a,b)=>hash(a.setup)-hash(b.setup));
 let yShown = false;
 function openSheet(){ $("sheet").classList.add("on"); drawY(); }
@@ -600,19 +519,16 @@ function flipY(){
   const y = DECK[st.yose], c=$("ycard"); yShown = true;
   const t=document.createElement("div"); t.className="turn"; t.textContent=y.turn;
   const w=document.createElement("div"); w.className="why"; w.textContent=y.why;
-  const m=document.createElement("div"); m.className="meta";
-  m.append(`${y.who}　｜　${y.signal}`);
+  const m=document.createElement("div"); m.className="meta"; m.append(`${y.who}　｜　${y.signal}`);
   if (y.source){ m.append("　｜　"); const l=document.createElement("a"); l.href=y.source; l.target="_blank"; l.rel="noopener"; l.textContent="出典"; m.append(l); }
   const ask=c.querySelector(".ask"); if (ask) ask.remove();
-  c.append(t,w,m);
-  $("yFlip").textContent = "次の札";
+  c.append(t,w,m); $("yFlip").textContent = "次の札";
 }
 function nextY(){ st.yose++; drawY("anim-l"); }
 function prevY(){ st.yose--; drawY("anim-r"); }
 $("yFlip").onclick = flipY; $("yNext").onclick = nextY; $("yPrev").onclick = prevY; $("yClose").onclick = closeSheet;
 swipe($("ycard"), nextY, prevY, flipY);
 (() => {
-  // 取っ手を上に引くか触れると開く。シートの上端を下に払うと閉じる
   const h = $("handle"); let y0=null, touched=false;
   h.addEventListener("touchstart", e=>{ touched=true; y0=e.touches[0].clientY; }, {passive:true});
   h.addEventListener("touchend", e=>{ if (y0===null) return; const dy=e.changedTouches[0].clientY-y0; y0=null; if (dy<-20 || Math.abs(dy)<10) openSheet(); });
