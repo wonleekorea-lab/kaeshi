@@ -1,0 +1,565 @@
+<title>返し</title>
+<style>
+:root{
+  --bg:#f3f2ee; --raise:#e8e6e0; --ink:#161616; --mid:#7d7b76; --line:#d6d3cc;
+  --serif:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  --sans:-apple-system,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#121212; --raise:#1d1d1d; --ink:#ecebe6; --mid:#85837e; --line:#2b2b2a; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#121212; --raise:#1d1d1d; --ink:#ecebe6; --mid:#85837e; --line:#2b2b2a; color-scheme:dark; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  padding-inline:20px;padding-block:6px;
+  min-height:100%;display:flex;flex-direction:column;overflow-x:hidden}
+[hidden]{display:none!important}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--mid);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+header{display:flex;justify-content:space-between;align-items:center;height:44px;font-size:12px;letter-spacing:.14em;color:var(--mid)}
+header button{padding:10px 0 10px 16px;color:var(--mid);letter-spacing:.14em}
+main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin:0 auto;padding-bottom:64px}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex}
+.mid-col{flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 0 16px}
+
+.label{font-size:11px;letter-spacing:.22em;color:var(--mid);margin-bottom:10px}
+.q{font-family:var(--serif);font-size:27px;line-height:1.5;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mid);line-height:1.8}
+
+.btn{height:54px;border-radius:14px;font-size:16px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;
+  background:var(--raise);color:var(--ink);width:100%}
+.btn.ink{background:var(--ink);color:var(--bg)}
+.btn:disabled{opacity:.3}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.textbtn{font-size:12px;color:var(--mid);letter-spacing:.1em;padding:0}
+
+/* 持ち歩いている一本と、今月のスコア */
+.stock{border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:22px}
+.stock .t{font-family:var(--serif);font-size:16px;line-height:1.6;margin:4px 0 10px}
+.stock .row .btn{height:44px;font-size:14px}
+.score{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;color:var(--mid);margin-bottom:8px}
+.score b{color:var(--ink);font-weight:600}
+
+/* 入力 */
+.box{background:var(--raise);border-radius:16px;padding:14px 16px 8px;margin-top:20px}
+.box textarea{width:100%;background:transparent;border:none;resize:none;outline:none;overflow:hidden;
+  font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--ink);min-height:30px}
+.box textarea::placeholder{color:var(--mid);font-size:15px}
+.boxfoot{display:flex;justify-content:space-between;align-items:center;min-height:28px;font-size:11px;color:var(--mid);letter-spacing:.08em}
+.boxfoot button{font-size:13px;color:var(--mid);padding:6px 0 6px 16px}
+.acts{margin-top:12px}
+
+/* ヒント */
+.hint{display:none;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:16px 16px 6px;touch-action:pan-y;user-select:none}
+.hint.on{display:block}
+.hint .s{font-family:var(--serif);font-size:19px;line-height:1.6}
+.hint .n{font-size:12px;color:var(--mid);margin-top:6px;line-height:1.6}
+.hint .nav{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.hint .nav button{width:56px;height:44px;color:var(--mid);font-size:22px}
+.hint .nav span{font-size:10px;letter-spacing:.2em;color:var(--mid)}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes slideL{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes slideR{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+
+.lines{list-style:none;margin-top:16px}
+.lines li{font-family:var(--serif);font-size:16px;line-height:1.6;padding:13px 2px;border-top:1px solid var(--line);animation:in .2s ease-out;cursor:pointer}
+.lines li:last-child{border-bottom:1px solid var(--line)}
+.lines li.editing{color:var(--mid)}
+
+/* 審査 */
+.step{display:flex;gap:12px;align-items:flex-start;margin-top:20px}
+.step i{font-style:normal;font-family:var(--serif);font-size:22px;line-height:1;width:22px;color:var(--mid)}
+.step div{flex:1}
+.judging{font-family:var(--serif);font-size:14px;line-height:1.8;color:var(--mid);white-space:pre-wrap;margin-top:14px;min-height:60px}
+.paste{width:100%;min-height:120px;background:var(--raise);color:var(--ink);border:none;border-radius:14px;padding:12px;font-size:13px;line-height:1.6;outline:none;margin-top:8px}
+
+/* 結果 */
+.verdict{font-family:var(--serif);font-size:44px;line-height:1.1}
+.vs{font-size:13px;color:var(--mid);margin-top:8px;line-height:1.7}
+.valid{font-size:11px;letter-spacing:.06em;color:var(--mid);margin-top:10px;line-height:1.7}
+.rank{list-style:none;margin-top:18px}
+.rank li{padding:12px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:34px 1fr;gap:4px 8px;animation:in .25s ease-out both}
+.rank li:last-child{border-bottom:1px solid var(--line)}
+.rank .no{font-family:var(--serif);font-size:20px;color:var(--mid);grid-row:span 2}
+.rank .r{font-family:var(--serif);font-size:16px;line-height:1.6}
+.rank .m{font-size:11px;color:var(--mid);line-height:1.6}
+.rank .m b{color:var(--ink);font-weight:600;letter-spacing:.06em}
+.rank li.me .r{font-weight:600}
+.rank li.me{cursor:pointer}
+.rank li.pick{outline:1.5px solid var(--ink);outline-offset:4px;border-radius:4px}
+
+/* ネタ帳 */
+.book-item{padding:14px 0;border-top:1px solid var(--line)}
+.book-item .d{font-size:10px;color:var(--mid);letter-spacing:.12em}
+.book-item .qq{font-size:12px;color:var(--mid);margin:4px 0}
+.book-item .aa{font-family:var(--serif);font-size:17px;line-height:1.65;outline:none;border-radius:8px}
+.book-item .aa[contenteditable=true]{background:var(--raise);padding:8px 10px}
+.book-item .tools{display:flex;gap:22px;margin-top:2px}
+.book-item .tools button{font-size:13px;color:var(--mid);padding:10px 0}
+.report{background:var(--raise);border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.8;margin-bottom:12px}
+.report b{font-family:var(--serif);font-size:18px;font-weight:600}
+.conf{color:var(--ink)!important}
+.set{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.set textarea{width:100%;background:var(--raise);color:var(--ink);border:none;border-radius:10px;padding:12px;font-size:13px;margin-top:8px;outline:none}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:999px;z-index:20;animation:in .2s ease-out;white-space:nowrap}
+
+/* 寄席 */
+.handle{position:fixed;left:0;right:0;bottom:0;height:calc(58px + env(safe-area-inset-bottom, 0px));display:flex;flex-direction:column;
+  align-items:center;padding-top:12px;gap:7px;background:linear-gradient(transparent,var(--bg) 45%);touch-action:none;z-index:5;cursor:pointer}
+.handle i{width:38px;height:4px;border-radius:2px;background:var(--mid);opacity:.5}
+.handle span{font-size:11px;letter-spacing:.26em;color:var(--mid)}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);
+  padding:calc(env(safe-area-inset-top, 0px) + 6px) 20px calc(env(safe-area-inset-bottom, 0px) + 14px);display:flex;flex-direction:column}
+.sheet.on{transform:none}
+.sheet .top{display:flex;justify-content:space-between;align-items:center;height:44px;font-size:12px;letter-spacing:.14em;color:var(--mid);max-width:460px;width:100%;margin:0 auto}
+.sheet .top button{padding:10px 0 10px 16px;color:var(--mid)}
+.ycard{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:460px;width:100%;margin:0 auto;touch-action:pan-y;user-select:none;cursor:pointer}
+.ycard .setup{font-family:var(--serif);font-size:20px;line-height:1.75}
+.ycard .ask{font-size:12px;color:var(--mid);letter-spacing:.16em;margin-top:24px}
+.ycard .turn{font-family:var(--serif);font-size:20px;line-height:1.75;margin-top:22px;padding-top:20px;border-top:1px solid var(--line);animation:in .25s ease-out}
+.ycard .why{font-size:13px;margin-top:14px;line-height:1.7}
+.ycard .meta{font-size:11px;color:var(--mid);margin-top:10px;line-height:1.7}
+.ycard .meta a{color:var(--mid)}
+.ycard.anim-l{animation:slideL .22s ease-out}
+.ycard.anim-r{animation:slideR .22s ease-out}
+.ynav{display:flex;gap:10px;max-width:460px;width:100%;margin:0 auto}
+.ynav .btn:first-child,.ynav .btn:last-child{flex:0 0 72px}
+</style>
+<header>
+  <span id="streak">返し</span>
+  <button id="toBook">ネタ帳</button>
+</header>
+<main>
+
+<!-- 試合：問いに3本で挑む -->
+<section class="screen" id="s-match">
+  <div class="mid-col">
+    <div class="score"><span>今月ウケた　<b id="hits">0</b>回</span><span id="wl"></span></div>
+    <div class="stock" id="stock" style="display:none">
+      <div class="label" style="margin:0">持って出ている一本　使ったら押す</div>
+      <div class="t" id="stockT"></div>
+      <div class="row"><button class="btn" id="miss">すべった</button><button class="btn ink" id="hit">ウケた</button></div>
+    </div>
+    <div class="label" style="display:flex;justify-content:space-between"><span>きょうの試合　3本で挑む</span><button class="textbtn" id="reroll">別の問い</button></div>
+    <div class="q" id="q"></div>
+    <div class="box">
+      <textarea id="typed" rows="1" placeholder="キーボードのマイクで答える" enterkeyhint="done"></textarea>
+      <div class="boxfoot"><span id="count"></span><span><button id="cancelBtn" style="display:none">やめる</button><button id="delBtn" style="display:none">消す</button></span></div>
+    </div>
+    <div class="row acts">
+      <button class="btn" id="hintBtn">ヒント</button>
+      <button class="btn ink" id="add">足す</button>
+    </div>
+    <div class="hint" id="hint">
+      <div class="s" id="hintS"></div><div class="n" id="hintN"></div>
+      <div class="nav"><button id="hPrev" aria-label="前のヒント">‹</button><span>触れる・払うと次へ</span><button id="hNext" aria-label="次のヒント">›</button></div>
+    </div>
+    <ul class="lines" id="answers"></ul>
+    <div style="margin-top:16px"><button class="btn" id="toJudge" disabled>審査する</button></div>
+  </div>
+</section>
+
+
+<!-- 結果 -->
+<section class="screen" id="s-result">
+  <div class="mid-col">
+    <div class="label" id="judgeLabel">審査中</div>
+    <div class="judging" id="judging"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="vs" id="vsLine"></div>
+    <div class="valid" id="validLine"></div>
+    <ul class="rank" id="rankList"></ul>
+    <div class="sub" id="pickNote" style="margin-top:12px">自分の答えに触れると、それを持って出る一本にする</div>
+  </div>
+  <div class="row"><button class="btn" id="rejudge" hidden>もう一度審査</button><button class="btn ink" id="carry">この一本を持って出る</button></div>
+</section>
+
+<!-- ネタ帳 -->
+<section class="screen" id="s-book">
+  <div class="label" style="margin-top:14px">審査員の成績</div>
+  <div class="report" id="report"></div>
+  <div class="label" id="bookHead" style="margin-top:14px">ネタ帳</div>
+  <div id="book"></div>
+  <p class="sub" id="saveNote" style="margin-top:18px"></p>
+  <div style="margin-top:20px"><button class="btn ink" id="bookBack">もどる</button></div>
+</section>
+
+</main>
+
+<div class="handle" id="handle"><i></i><span>寄席　引き上げる</span></div>
+<div class="sheet" id="sheet">
+  <div class="top"><span id="ycount">寄席</span><button id="yClose">とじる</button></div>
+  <div class="ycard" id="ycard"></div>
+  <div class="ynav">
+    <button class="btn" id="yPrev">‹</button>
+    <button class="btn ink" id="yFlip">返しを見る</button>
+    <button class="btn" id="yNext">›</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="hints.js"></script>
+<script src="judge.js"></script>
+<script src="yose.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = "kaeshi-v2";
+const ymd = d => new Date(d - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const today = () => ymd(new Date());
+const LABELS = "ABCDEFGH".split("");
+
+// ---- 保存 ----
+// entries: {date,qid,q,items:[{label,who,setup,r}],n:{A:3..},order,notes,valid,result,pick,predict,outcome:"hit"|"miss"|null,usedAt}
+let st = {};
+function norm(){
+  st.entries = st.entries || [];
+  st.draft   = st.draft   || null;   // {date,qid,answers:[{t}],items}
+  st.used    = st.used    || [];
+  st.yose    = st.yose    || 0;
+  st.stock   = st.stock   ?? null;   // 持って出ている一本：entries の添字
+}
+try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) {}
+norm();
+// アカウントの保存先。1人1文書（data/users/<id>/state）。書き込みは一度に一つ、まとめて
+let dbRef = null, saving = false, again = false, saveTimer = null;
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {}
+  if (!dbRef) return;
+  clearTimeout(saveTimer); saveTimer = setTimeout(flush, 600);
+}
+async function flush(){
+  if (saving) { again = true; return; }
+  saving = true;
+  try { await dbRef.set(JSON.parse(JSON.stringify(st))); } catch(e) { $("saveNote").textContent = "アカウントに保存できなかった。この端末には残っている"; }
+  saving = false;
+  if (again) { again = false; flush(); }
+}
+async function connect(){
+  try {
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    const id = user && await user.id();
+    if (!db || !id) { $("saveNote").textContent = "記録はこの端末の中だけに保存されている"; return; }
+    dbRef = db.doc("data/users/" + id + "/state");
+    const snap = await dbRef.get();
+    if (snap.exists) {
+      const remote = snap.data();
+      if ((remote.entries||[]).length >= st.entries.length) { st = JSON.parse(JSON.stringify(remote)); norm(); }
+      else save();
+    } else if (st.entries.length || st.draft) save();
+    $("saveNote").textContent = "記録は claude.ai のあなたのアカウントに保存され、スマホとMacで同じものが見られる";
+    start();
+  } catch(e) { $("saveNote").textContent = "記録はこの端末の中だけに保存されている"; }
+}
+// 確認の窓は出ないので、二度押しで確定する
+function twice(btn, label, fn){
+  if (btn.dataset.arm) { delete btn.dataset.arm; btn.classList.remove("conf"); btn.textContent = btn.dataset.orig; fn(); return; }
+  btn.dataset.orig = btn.textContent; btn.dataset.arm = "1"; btn.classList.add("conf"); btn.textContent = label;
+  setTimeout(()=>{ if (btn.dataset.arm) { delete btn.dataset.arm; btn.classList.remove("conf"); btn.textContent = btn.dataset.orig; } }, 3000);
+}
+
+function hash(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+function rng(seed){ let x = seed || 1; return () => (x = Math.imul(x ^ (x>>>15), 2246822507) + 0x6D2B79F5 >>> 0) / 4294967296; }
+function pickQid(salt=0){
+  const done = new Set(st.entries.map(e=>e.qid));
+  let pool = QUESTIONS.filter(q=>!done.has(q.id));
+  if (!pool.length) pool = QUESTIONS;
+  return pool[hash(today()+":"+salt) % pool.length].id;
+}
+const Q = id => QUESTIONS.find(q=>q.id===id);
+function show(name){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id==="s-"+name)); window.scrollTo(0,0); }
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.append(d); setTimeout(()=>d.remove(), 2600); }
+function swipe(el, onLeft, onRight, onTap){
+  let x0=null, y0=0, t0=0, touched=false;
+  el.addEventListener("touchstart", e=>{ touched=true; x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
+  el.addEventListener("touchend", e=>{
+    if (x0===null) return;
+    const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
+    if (e.target.closest("button,a")) return;
+    if (Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)) { (dx<0?onLeft:onRight)(); e.preventDefault(); }
+    else if (Math.abs(dx)<10 && Math.abs(dy)<10 && Date.now()-t0<450 && onTap) { onTap(); e.preventDefault(); }
+  });
+  el.addEventListener("click", e=>{ if (!touched && onTap && !e.target.closest("button,a")) onTap(); });
+}
+
+// ---- 上の段：今月のスコアと、持って出ている一本 ----
+function drawTop(){
+  const month = today().slice(0,7);
+  $("hits").textContent = st.entries.filter(e=>e.outcome==="hit" && (e.usedAt||"").startsWith(month)).length;
+  const w = st.entries.filter(e=>e.result==="勝ち").length, l = st.entries.filter(e=>e.result==="負け").length;
+  $("wl").textContent = st.entries.length ? `対ライバル ${w}勝${l}敗` : "";
+  const days = new Set(st.entries.map(e=>e.date)); let n=0, d=new Date();
+  if (!days.has(today())) d.setDate(d.getDate()-1);
+  while (days.has(ymd(d))) { n++; d.setDate(d.getDate()-1); }
+  $("streak").textContent = n ? `返し　${n}日目` : "返し";
+  const s = st.stock!==null ? st.entries[st.stock] : null;
+  $("stock").style.display = s && !s.outcome ? "" : "none";
+  if (s) $("stockT").textContent = `「${s.pick}」　予測 ${s.predict ?? "?"}人`;
+}
+function useStock(outcome){
+  const s = st.entries[st.stock]; if (!s) return;
+  s.outcome = outcome; s.usedAt = today(); st.stock = null; save(); drawTop();
+  toast(outcome==="hit" ? "ウケた。1回" : "すべった。記録した");
+}
+$("hit").onclick = () => useStock("hit");
+$("miss").onclick = () => useStock("miss");
+
+// ---- 試合 ----
+let cur, salt = 0;
+function start(){
+  if (st.draft && st.draft.date === today()) cur = st.draft;
+  else { cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save(); }
+  resetHint(); endEdit(); renderMatch(); drawTop(); show("match");
+}
+const ta = $("typed");
+let editIdx = null;
+function renderMatch(){
+  $("q").textContent = Q(cur.qid).q;
+  const box = $("answers"); box.innerHTML = "";
+  cur.answers.forEach((a,i)=>{
+    const li=document.createElement("li"); li.textContent = a.t;
+    if (i===editIdx) li.classList.add("editing");
+    li.onclick = () => startEdit(i);
+    box.append(li);
+  });
+  const n = cur.answers.length;
+  $("count").textContent = editIdx!==null ? "直している" : n<3 ? `${n} / 3本` : "3本そろった　触れると直せる";
+  $("add").disabled = n>=3 && editIdx===null;
+  $("toJudge").disabled = n<1;
+  $("toJudge").classList.toggle("ink", n>=3);
+}
+const grow = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + "px"; };
+function commit(){
+  const t = ta.value.trim().replace(/[。\s]+$/,"");
+  if (t) {
+    if (editIdx!==null) cur.answers[editIdx].t = t; else if (cur.answers.length<3) cur.answers.push({ t });
+    cur.items = null; st.draft = cur; save();
+  }
+  ta.value = ""; grow(); endEdit(); renderMatch();
+}
+function startEdit(i){
+  editIdx = i; ta.value = cur.answers[i].t; grow(); ta.focus();
+  $("add").textContent = "直す"; $("delBtn").style.display=""; $("cancelBtn").style.display="";
+  renderMatch();
+}
+function endEdit(){ editIdx = null; $("add").textContent = "足す"; $("delBtn").style.display="none"; $("cancelBtn").style.display="none"; }
+$("delBtn").onclick = () => { cur.answers.splice(editIdx,1); cur.items=null; st.draft=cur; save(); ta.value=""; grow(); endEdit(); renderMatch(); };
+$("cancelBtn").onclick = () => { ta.value=""; grow(); endEdit(); renderMatch(); };
+$("add").onclick = commit;
+ta.oninput = () => { if (ta.value.includes("\n")) { ta.value = ta.value.replace(/\n/g,""); commit(); } else grow(); };
+ta.onkeydown = e => { if (e.key==="Enter" && !e.isComposing){ e.preventDefault(); commit(); } };
+$("reroll").onclick = () => {
+  if (cur.answers.length && !$("reroll").dataset.arm) return twice($("reroll"), "答えが消える。もう一度押す", ()=>{});
+  if ($("reroll").dataset.arm) { delete $("reroll").dataset.arm; $("reroll").classList.remove("conf"); $("reroll").textContent = $("reroll").dataset.orig; }
+  salt++; cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save();
+  resetHint(); endEdit(); renderMatch();
+};
+
+// ---- ヒント ----
+let hHist = [], hPos = -1, lastType = "";
+function resetHint(){ hHist=[]; hPos=-1; lastType=""; $("hint").classList.remove("on"); $("hintBtn").textContent="ヒント"; }
+function freshHint(){
+  const own = (QHINTS[cur.qid]||[]).map((h,i)=>({...h, id:`${cur.qid}:${i}`}));
+  const gen = SPARKS.map((h,i)=>({...h, id:`g:${i}`}));
+  const used = new Set(st.used);
+  const order = arr => arr.sort((a,b)=>hash(today()+a.id)-hash(today()+b.id));
+  let pool = order(own.filter(h=>!used.has(h.id)));
+  if (!pool.length) {
+    let g = gen.filter(h=>!used.has(h.id));
+    if (!g.length) { st.used = st.used.filter(id=>!id.startsWith("g:")); g = gen; }
+    pool = order(g);
+  }
+  const h = pool.find(x=>x.type!==lastType) || pool[0];
+  st.used.push(h.id); save(); lastType = h.type;
+  return h;
+}
+function drawHint(anim){
+  const h = hHist[hPos], c = $("hint");
+  $("hintS").textContent = h.s; $("hintN").textContent = h.n || "";
+  c.classList.add("on"); c.style.animation="none"; void c.offsetWidth; c.style.animation=`${anim} .2s ease-out`;
+  $("hPrev").style.visibility = hPos>0 ? "visible" : "hidden";
+}
+function hintNext(){ if (hPos < hHist.length-1) hPos++; else { hHist.push(freshHint()); hPos = hHist.length-1; } drawHint("slideL"); $("hintBtn").textContent = "次のヒント"; }
+function hintPrev(){ if (hPos>0){ hPos--; drawHint("slideR"); } }
+$("hintBtn").onclick = hintNext; $("hNext").onclick = hintNext; $("hPrev").onclick = hintPrev;
+swipe($("hint"), hintNext, hintPrev, hintNext);
+
+// ---- 審査：伏せて混ぜる ----
+function buildItems(){
+  const q = Q(cur.qid), set = `初対面の飲み会で「${q.q}」と聞かれた。`;
+  const r = rng(hash(cur.date + cur.qid + cur.answers.map(a=>a.t).join("|")));
+  const anchor = ANCHORS[Math.floor(r()*ANCHORS.length)];
+  const items = [
+    ...cur.answers.map(a=>({ who:"あなた", setup:set, r:a.t })),
+    ...q.m.map(m=>({ who:"ライバル", setup:set, r:m.r })),
+    { who:"ウケた札", setup:anchor.setup, r:anchor.r },
+    { who:"つまらない札", setup:set, r:FLAT[cur.qid] || "普通です" },
+  ];
+  for (let i=items.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+  items.forEach((it,i)=>it.label=LABELS[i]);
+  return items;
+}
+let sampleFn = null, ctl = null;
+claude.use("sample").then(f => { sampleFn = f; });
+$("toJudge").onclick = () => {
+  if (ta.value.trim()) commit();
+  if (!cur.items) { cur.items = buildItems(); st.draft = cur; save(); }
+  judge();
+};
+$("rejudge").onclick = () => judge();
+async function judge(){
+  $("verdict").textContent = ""; $("vsLine").textContent = ""; $("validLine").textContent = ""; $("rankList").innerHTML = "";
+  $("judgeLabel").hidden = false; $("judging").hidden = false;
+  $("judging").textContent = "伏せた8本を、審査員が読んでいる…";
+  $("carry").hidden = true; $("rejudge").hidden = true; $("pickNote").hidden = true;
+  show("result");
+  if (!sampleFn) { $("judging").textContent = "この画面では審査員を呼べない。claude.ai で開いてください"; $("rejudge").hidden = false; return; }
+  ctl = new AbortController();
+  try {
+    const { text } = await sampleFn(judgePrompt(cur.items), { cache:false, signal: ctl.signal,
+      onText: ({ text }) => { $("judging").textContent = text; } });
+    finish(text);
+  } catch(e) {
+    $("judging").textContent = ({ not_granted:"Claude を使う許可が出ていない。ページの許可から変えられる",
+      rate_limited:"いまは混んでいる。少し置いてから、もう一度",
+      session_expired:"claude.ai にログインし直してから、もう一度",
+      sampling_disabled:"このアカウントでは使えない" })[e.code] || "審査が途中で止まった。もう一度";
+    $("rejudge").hidden = false;
+  }
+}
+
+// ---- 結果 ----
+let resEntry = null;
+function finish(text){
+  const labels = cur.items.map(i=>i.label);
+  const j = parseJudge(text, labels);
+  if (!j.ok) { $("judging").textContent = text + "\n\n（人数が全部読めなかった。もう一度審査）"; $("rejudge").hidden = false; return; }
+  const pos = l => j.order.indexOf(l);
+  const by = w => cur.items.filter(i=>i.who===w);
+  const anchor = by("ウケた札")[0], flat = by("つまらない札")[0];
+  const half = cur.items.length/2;
+  // 審査員の検査：ウケた札が上半分、つまらない札が下半分に置かれた日だけ有効
+  const valid = pos(anchor.label) < half && pos(flat.label) >= half;
+  const best = w => Math.max(...by(w).map(i=>j.n[i.label]));
+  const me = best("あなた"), rival = best("ライバル");
+  const result = me>rival ? "勝ち" : me<rival ? "負け" : "引き分け";
+  const mine = by("あなた").sort((a,b)=>pos(a.label)-pos(b.label));
+  resEntry = { date: cur.date, qid: cur.qid, q: Q(cur.qid).q, items: cur.items, n: j.n, order: j.order,
+               notes: text, valid, result, pick: mine[0].r, predict: j.n[mine[0].label], outcome: null };
+  st.entries.push(resEntry); st.draft = null; save();
+  $("judgeLabel").hidden = true; $("judging").hidden = true;
+  $("carry").hidden = false; $("pickNote").hidden = false;
+  drawResult(j, valid, result, me, rival);
+}
+function drawResult(j, valid, result, me, rival){
+  $("verdict").textContent = valid ? result : `${result}（参考）`;
+  $("vsLine").textContent = `あなたの最高 ${me}人　対　ライバルの最高 ${rival}人`;
+  $("validLine").textContent = valid
+    ? "審査員は、ウケた札を上に・つまらない札を下に置けた。この判定は信用していい"
+    : "審査員が答え合わせの札を外した。今日の判定は参考まで";
+  const ul = $("rankList"); ul.innerHTML = "";
+  const lines = {}; for (const m of (resEntry.notes||"").matchAll(/([A-H])\s*[:：]\s*\d{1,2}\s*人\s*[｜|]\s*(.+)/g)) lines[m[1]] = m[2].trim();
+  j.order.forEach((l,k)=>{
+    const it = resEntry.items.find(i=>i.label===l); if (!it) return;
+    const li = document.createElement("li"); if (it.who==="あなた") li.classList.add("me");
+    li.style.animationDelay = (k*90)+"ms";
+    li.innerHTML = `<span class="no"></span><span class="r"></span><span class="m"></span>`;
+    li.querySelector(".no").textContent = k+1;
+    li.querySelector(".r").textContent = it.r;
+    const m = li.querySelector(".m"); const b=document.createElement("b"); b.textContent = `${it.who}　${j.n[l]}人`; m.append(b, lines[l] ? "　" + lines[l] : "");
+    if (it.who==="あなた") {
+      if (it.r===resEntry.pick) li.classList.add("pick");
+      li.onclick = () => { resEntry.pick = it.r; resEntry.predict = j.n[l]; save(); ul.querySelectorAll("li").forEach(x=>x.classList.remove("pick")); li.classList.add("pick"); };
+    }
+    ul.append(li);
+  });
+  show("result");
+}
+$("carry").onclick = () => { st.stock = st.entries.indexOf(resEntry); save(); salt++; start(); toast("持って出る。使ったら押す"); };
+
+// ---- ネタ帳と、審査員の成績 ----
+function openBook(){
+  const used = st.entries.filter(e=>e.outcome);
+  const hit = used.filter(e=>e.outcome==="hit"), miss = used.filter(e=>e.outcome==="miss");
+  const avg = a => a.length ? (a.reduce((s,e)=>s+(e.predict||0),0)/a.length).toFixed(1) : "—";
+  const validRate = st.entries.length ? Math.round(100*st.entries.filter(e=>e.valid).length/st.entries.length) : 0;
+  $("report").innerHTML = used.length < 3
+    ? `実戦で使った記録が3回たまると、審査員の予測が当たっているかがここに出る。いま ${used.length}回。<br>答え合わせの札を正しく置けた日　${validRate}%`
+    : `ウケた一本の予測　平均 <b>${avg(hit)}</b>人<br>すべった一本の予測　平均 <b>${avg(miss)}</b>人<br>${(+avg(hit)||0) > (+avg(miss)||0) ? "ウケた方を高く予測できている。審査員は信用していい" : "まだ当たっていない。判定は割り引いて見る"}<br>答え合わせの札を正しく置けた日　${validRate}%`;
+  const b = $("book"); b.innerHTML = "";
+  $("bookHead").textContent = `ネタ帳　${st.entries.length}本`;
+  if (!st.entries.length) b.innerHTML = `<p class="sub">まだ空。試合を一回やると、ここに入る。</p>`;
+  [...st.entries].reverse().forEach(e=>{
+    const d = document.createElement("div"); d.className="book-item";
+    d.innerHTML = `<div class="d"></div><div class="qq"></div><div class="aa"></div><div class="tools"><button data-a="carry">持って出る</button><button data-a="edit">直す</button><button data-a="del">消す</button></div>`;
+    const out = e.outcome==="hit" ? "　ウケた" : e.outcome==="miss" ? "　すべった" : "";
+    d.querySelector(".d").textContent = `${e.date}　${e.result||""}${e.valid?"":"（参考）"}　予測${e.predict??"?"}人${out}`;
+    d.querySelector(".qq").textContent = e.q;
+    const aa = d.querySelector(".aa"); aa.textContent = e.pick;
+    const editBtn = d.querySelector('[data-a=edit]');
+    editBtn.onclick = () => {
+      if (aa.isContentEditable) { const t = aa.textContent.trim(); if (t) { e.pick = t; save(); } aa.contentEditable = "false"; editBtn.textContent = "直す"; }
+      else { aa.contentEditable = "true"; aa.focus(); editBtn.textContent = "保存"; }
+    };
+    d.querySelector('[data-a=carry]').onclick = () => { e.outcome = null; st.stock = st.entries.indexOf(e); save(); toast("持って出る。使ったら押す"); start(); };
+    const delBtn = d.querySelector('[data-a=del]');
+    delBtn.onclick = () => twice(delBtn, "もう一度押すと消える", () => {
+      const i = st.entries.indexOf(e); st.entries.splice(i,1);
+      if (st.stock===i) st.stock=null; else if (st.stock>i) st.stock--;
+      save(); openBook();
+    });
+    b.append(d);
+  });
+  show("book");
+}
+$("toBook").onclick = openBook;
+$("bookBack").onclick = () => start();
+
+// ---- 寄席 ----
+const DECK = ((typeof YOSE !== "undefined" && YOSE) || []).slice().sort((a,b)=>hash(a.setup)-hash(b.setup));
+let yShown = false;
+function openSheet(){ $("sheet").classList.add("on"); drawY(); }
+function closeSheet(){ $("sheet").classList.remove("on"); }
+function drawY(dir){
+  const c = $("ycard"); c.innerHTML = "";
+  if (!DECK.length){ c.innerHTML = `<p class="sub">まだ札がありません。</p>`; return; }
+  st.yose = ((st.yose % DECK.length) + DECK.length) % DECK.length; save();
+  const y = DECK[st.yose]; yShown = false;
+  $("ycount").textContent = `寄席　${st.yose+1} / ${DECK.length}`;
+  const s=document.createElement("div"); s.className="setup"; s.textContent=y.setup;
+  const a=document.createElement("div"); a.className="ask"; a.textContent="あなたなら、どう返す？　触れると答え";
+  c.append(s,a);
+  $("yFlip").textContent = "返しを見る";
+  c.classList.remove("anim-l","anim-r"); void c.offsetWidth; if (dir) c.classList.add(dir);
+}
+function flipY(){
+  if (!DECK.length) return;
+  if (yShown) return nextY();
+  const y = DECK[st.yose], c=$("ycard"); yShown = true;
+  const t=document.createElement("div"); t.className="turn"; t.textContent=y.turn;
+  const w=document.createElement("div"); w.className="why"; w.textContent=y.why;
+  const m=document.createElement("div"); m.className="meta"; m.append(`${y.who}　｜　${y.signal}`);
+  if (y.source){ m.append("　｜　"); const l=document.createElement("a"); l.href=y.source; l.target="_blank"; l.rel="noopener"; l.textContent="出典"; m.append(l); }
+  const ask=c.querySelector(".ask"); if (ask) ask.remove();
+  c.append(t,w,m); $("yFlip").textContent = "次の札";
+}
+function nextY(){ st.yose++; drawY("anim-l"); }
+function prevY(){ st.yose--; drawY("anim-r"); }
+$("yFlip").onclick = flipY; $("yNext").onclick = nextY; $("yPrev").onclick = prevY; $("yClose").onclick = closeSheet;
+swipe($("ycard"), nextY, prevY, flipY);
+(() => {
+  const h = $("handle"); let y0=null, touched=false;
+  h.addEventListener("touchstart", e=>{ touched=true; y0=e.touches[0].clientY; }, {passive:true});
+  h.addEventListener("touchend", e=>{ if (y0===null) return; const dy=e.changedTouches[0].clientY-y0; y0=null; if (dy<-20 || Math.abs(dy)<10) openSheet(); });
+  h.addEventListener("click", ()=>{ if (!touched) openSheet(); });
+  let s0=null; const top=$("sheet").querySelector(".top");
+  top.addEventListener("touchstart", e=>{ s0=e.touches[0].clientY; }, {passive:true});
+  top.addEventListener("touchend", e=>{ if (s0!==null && e.changedTouches[0].clientY-s0>40) closeSheet(); s0=null; });
+})();
+
+start();
+connect();
+</script>
