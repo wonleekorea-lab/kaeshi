@@ -90,6 +90,8 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
 .rank .m b{color:var(--ink);font-weight:600;letter-spacing:.06em}
 .rank li.me .r{font-weight:600}
 .rank li.me{cursor:pointer}
+.oo{font-size:12px;letter-spacing:.1em;color:var(--mid);border:1px solid var(--line);border-radius:999px;padding:6px 12px;margin-top:6px;justify-self:start;grid-column:2}
+.oo.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .rank li.pick{outline:1.5px solid var(--ink);outline-offset:4px;border-radius:4px}
 
 /* ネタ帳 */
@@ -146,6 +148,11 @@ main{flex:1;display:flex;flex-direction:column;max-width:460px;width:100%;margin
     </div>
     <div class="label" style="display:flex;justify-content:space-between"><span>きょうの試合　3本で挑む</span><button class="textbtn" id="reroll">別の問い</button></div>
     <div class="q" id="q"></div>
+    <button class="textbtn" id="realBtn" style="margin-top:10px;text-align:left">今日、実際に言われた一言を問いにする</button>
+    <div class="box" id="realBox" hidden style="margin-top:10px">
+      <textarea id="realQ" rows="1" placeholder="例：上司に「最近たるんでない？」と言われた" enterkeyhint="done"></textarea>
+      <div class="boxfoot"><span>場面ごと書くと、切り口が立つ</span><button id="realGo">この問いにする</button></div>
+    </div>
     <div class="box">
       <textarea id="typed" rows="1" placeholder="キーボードのマイクで答える" enterkeyhint="done"></textarea>
       <div class="boxfoot"><span id="count"></span><span><button id="cancelBtn" style="display:none">やめる</button><button id="delBtn" style="display:none">消す</button></span></div>
@@ -221,6 +228,7 @@ function norm(){
   st.used    = st.used    || [];
   st.yose    = st.yose    || 0;
   st.stock   = st.stock   ?? null;   // 持って出ている一本：entries の添字
+  st.liked   = st.liked   || [];     // 「おお」と言った切り口 {q,r,broke}
 }
 try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) {}
 norm();
@@ -270,6 +278,8 @@ function pickQid(salt=0){
   return pool[hash(today()+":"+salt) % pool.length].id;
 }
 const Q = id => QUESTIONS.find(q=>q.id===id);
+const qText = () => cur.qtext || (Q(cur.qid)||{}).q || "";
+const qSetup = () => cur.qtext ? `${cur.qtext}。` : `初対面の飲み会で「${qText()}」と聞かれた。`;
 function show(name){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id==="s-"+name)); window.scrollTo(0,0); }
 function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.append(d); setTimeout(()=>d.remove(), 2600); }
 function swipe(el, onLeft, onRight, onTap){
@@ -317,7 +327,7 @@ function start(){
 const ta = $("typed");
 let editIdx = null;
 function renderMatch(){
-  $("q").textContent = Q(cur.qid).q;
+  $("q").textContent = qText();
   const box = $("answers"); box.innerHTML = "";
   cur.answers.forEach((a,i)=>{
     const li=document.createElement("li"); li.textContent = a.t;
@@ -357,6 +367,13 @@ $("reroll").onclick = () => {
   salt++; cur = { date: today(), qid: pickQid(salt), answers: [] }; st.draft = cur; save();
   resetHint(); endEdit(); renderMatch();
 };
+$("realBtn").onclick = () => { $("realBox").hidden = !$("realBox").hidden; if (!$("realBox").hidden) $("realQ").focus(); };
+$("realGo").onclick = () => {
+  const t = $("realQ").value.trim().replace(/[。\s]+$/,""); if (!t) return;
+  salt++; cur = { date: today(), qid: "real:" + hash(t), qtext: t, answers: [] }; st.draft = cur; save();
+  $("realBox").hidden = true; $("realQ").value = "";
+  resetHint(); endEdit(); renderMatch();
+};
 
 // ---- ヒント ----
 let hHist = [], hPos = -1, lastType = "";
@@ -388,13 +405,33 @@ $("hintBtn").onclick = hintNext; $("hNext").onclick = hintNext; $("hPrev").oncli
 swipe($("hint"), hintNext, hintPrev, hintNext);
 
 // ---- 審査：伏せて混ぜる ----
-function buildItems(){
-  const q = Q(cur.qid), set = `初対面の飲み会で「${q.q}」と聞かれた。`;
-  const r = rng(hash(cur.date + cur.qid + cur.answers.map(a=>a.t).join("|")));
+// ライバル：Claude がその場で作る（隠れた前提を壊して12本→3本）。呼べない日は、用意してある3本
+async function makeRival(r){
+  const q = Q(cur.qid);
+  const fallback = q ? q.m.map(m=>({ r:m.r, broke:"" })) : [];
+  if (!sampleFn) return fallback;
+  const pick = (arr, n) => { const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a.slice(0,n); };
+  const anchors = pick(ANCHORS, 8);
+  const transplant = (typeof YOSE!=="undefined" && YOSE.length) ? YOSE[Math.floor(r()*YOSE.length)] : null;
+  const liked = st.liked.slice(-12);
+  $("judging").textContent = "ライバルが、隠れた前提を壊して書いている…　半分ほど捨てて3本にする";
+  try {
+    const out = await sampleFn.json(rivalPrompt(qText(), qSetup(), cur.answers.map(a=>a.t), anchors, liked, transplant),
+      { modelTier:"complex", cache:false, signal: ctl.signal });
+    const keep = (out && Array.isArray(out.keep) ? out.keep : []).filter(k=>k && typeof k.r==="string" && k.r.trim()).slice(0,3)
+      .map(k=>({ r:k.r.trim().replace(/[。\s]+$/,""), broke:String(k.broke||"").slice(0,30) }));
+    if (keep.length===3) return keep;
+  } catch(e) { if (e && e.code==="cancelled") throw e; }
+  return fallback;
+}
+async function buildItems(){
+  const set = qSetup();
+  const r = rng(hash(cur.date + cur.qid + cur.answers.map(a=>a.t).join("|") + (cur.regen||0)));
   const anchor = ANCHORS[Math.floor(r()*ANCHORS.length)];
+  const rival = await makeRival(r);
   const items = [
     ...cur.answers.map(a=>({ who:"あなた", setup:set, r:a.t })),
-    ...q.m.map(m=>({ who:"ライバル", setup:set, r:m.r })),
+    ...rival.map(m=>({ who:"ライバル", setup:set, r:m.r, broke:m.broke })),
     { who:"ウケた札", setup:anchor.setup, r:anchor.r },
     { who:"つまらない札", setup:set, r:FLAT[cur.qid] || "普通です" },
   ];
@@ -403,12 +440,8 @@ function buildItems(){
   return items;
 }
 let sampleFn = null, ctl = null;
-claude.use("sample").then(f => { sampleFn = f; });
-$("toJudge").onclick = () => {
-  if (ta.value.trim()) commit();
-  if (!cur.items) { cur.items = buildItems(); st.draft = cur; save(); }
-  judge();
-};
+claude.use("sample").then(f => { sampleFn = f; if (!f) $("realBtn").hidden = true; });
+$("toJudge").onclick = () => { if (ta.value.trim()) commit(); judge(); };
 $("rejudge").onclick = () => judge();
 async function judge(){
   $("verdict").textContent = ""; $("vsLine").textContent = ""; $("validLine").textContent = ""; $("rankList").innerHTML = "";
@@ -419,9 +452,11 @@ async function judge(){
   if (!sampleFn) { $("judging").textContent = "この画面では審査員を呼べない。claude.ai で開いてください"; $("rejudge").hidden = false; return; }
   ctl = new AbortController();
   try {
+    if (!cur.items) { cur.items = await buildItems(); st.draft = cur; save(); }
+    $("judging").textContent = "伏せた8本を、審査員が読んでいる…";
     const { text } = await sampleFn(judgePrompt(cur.items), { cache:false, signal: ctl.signal,
       onText: ({ text }) => { $("judging").textContent = text; } });
-    finish(text);
+    await finish(text);
   } catch(e) {
     $("judging").textContent = ({ not_granted:"Claude を使う許可が出ていない。ページの許可から変えられる",
       rate_limited:"いまは混んでいる。少し置いてから、もう一度",
@@ -433,7 +468,7 @@ async function judge(){
 
 // ---- 結果 ----
 let resEntry = null;
-function finish(text){
+async function finish(text){
   const labels = cur.items.map(i=>i.label);
   const j = parseJudge(text, labels);
   if (!j.ok) { $("judging").textContent = text + "\n\n（人数が全部読めなかった。もう一度審査）"; $("rejudge").hidden = false; return; }
@@ -445,9 +480,15 @@ function finish(text){
   const valid = pos(anchor.label) < half && pos(flat.label) >= half;
   const best = w => Math.max(...by(w).map(i=>j.n[i.label]));
   const me = best("あなた"), rival = best("ライバル");
+  // ライバルの出来が悪い日は、一度だけ作り直して審査し直す
+  if (rival < 5 && !cur.regen && cur.items.some(i=>i.who==="ライバル" && i.broke!==undefined)) {
+    cur.regen = 1; cur.items = null; st.draft = cur; save();
+    $("judging").textContent = "ライバルの出来が悪い。作り直している…";
+    return judge();
+  }
   const result = me>rival ? "勝ち" : me<rival ? "負け" : "引き分け";
   const mine = by("あなた").sort((a,b)=>pos(a.label)-pos(b.label));
-  resEntry = { date: cur.date, qid: cur.qid, q: Q(cur.qid).q, items: cur.items, n: j.n, order: j.order,
+  resEntry = { date: cur.date, qid: cur.qid, q: qText(), items: cur.items, n: j.n, order: j.order,
                notes: text, valid, result, pick: mine[0].r, predict: j.n[mine[0].label], outcome: null };
   st.entries.push(resEntry); st.draft = null; save();
   $("judgeLabel").hidden = true; $("judging").hidden = true;
@@ -470,6 +511,16 @@ function drawResult(j, valid, result, me, rival){
     li.querySelector(".no").textContent = k+1;
     li.querySelector(".r").textContent = it.r;
     const m = li.querySelector(".m"); const b=document.createElement("b"); b.textContent = `${it.who}　${j.n[l]}人`; m.append(b, lines[l] ? "　" + lines[l] : "");
+    if (it.who==="ライバル") {
+      if (it.broke) { const d=document.createElement("div"); d.className="m"; d.style.gridColumn="2"; d.textContent = "壊した前提：" + it.broke; li.append(d); }
+      const oo = document.createElement("button"); oo.className = "oo"; oo.textContent = "おお";
+      const key = x => x.q===resEntry.q && x.r===it.r;
+      if (st.liked.some(key)) oo.classList.add("on");
+      oo.onclick = ev => { ev.stopPropagation();
+        if (st.liked.some(key)) st.liked = st.liked.filter(x=>!key(x)); else { st.liked.push({ q: resEntry.q, r: it.r, broke: it.broke||"" }); st.liked = st.liked.slice(-30); }
+        save(); oo.classList.toggle("on", st.liked.some(key)); };
+      li.append(oo);
+    }
     if (it.who==="あなた") {
       if (it.r===resEntry.pick) li.classList.add("pick");
       li.onclick = () => { resEntry.pick = it.r; resEntry.predict = j.n[l]; save(); ul.querySelectorAll("li").forEach(x=>x.classList.remove("pick")); li.classList.add("pick"); };
